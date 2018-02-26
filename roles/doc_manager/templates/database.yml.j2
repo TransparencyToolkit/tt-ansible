@@ -1,0 +1,17 @@
+{# config/database.yml #}
+
+production:
+  adapter: postgresql
+  encoding: unicode
+  database: {{ postgres_db }}
+  pool: 5
+  username: {{ postgres_username }}
+  password: {{ postgres_password }}
+
+development:
+  adapter: postgresql
+  encoding: unicode
+  database: {{ postgres_db }}
+  pool: 5
+  username: {{ postgres_username }}
+  password: {{ postgres_password }}

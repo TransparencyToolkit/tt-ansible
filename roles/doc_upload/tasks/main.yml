@@ -1,0 +1,5 @@
+---
+
+- name: Install gem dependencies
+  become: true
+  command: bash -lc 'gem install sinatra erb pry doc_integrity_check'

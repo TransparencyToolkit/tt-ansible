@@ -1,0 +1,39 @@
+---
+# Install and configure target ruby version using 'rbenv'
+
+- name: Install rbenv
+  apt:
+    state: latest
+    install_recommends: no
+    name:
+      - rbenv
+      - curl
+      - ruby-build # for: 'rbenv install'
+      - libssl-dev # for: 'rbenv install'
+      - libcurl4-openssl-dev # undeclared/missing dependency for curb gem
+
+# gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
+#gpg2 --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3
+
+- name: install target ruby version with rbenv
+  command: rbenv install --skip-existing {{ ruby_version }}
+
+- name: enable target ruby version globally with rbenv
+  command: rbenv global {{ ruby_version }}
+
+- shell: fgrep 'rbenv()' ~/.bashrc
+  register: has_rbenv_stub
+  ignore_errors: True
+  # TODO replace with lineinfile or whatever
+
+- name: add rbenv init to ~/.bashrc and ~/.profile
+  shell: 'rbenv init - >> ~/.bashrc && rbenv init - >> ~/.profile'
+  when: has_rbenv_stub|failed
+  # TODO for root too
+
+- name: ensure target ruby version is being used
+  command: bash -lc 'ruby -v | fgrep {{ ruby_version }}'
+
+- name: install bundler
+  become: true
+  command: bash -lc 'gem install bundler'

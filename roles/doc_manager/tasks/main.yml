@@ -1,0 +1,116 @@
+---
+- name: Fetch DocManager source code
+  register: docmanager
+  async: 3600
+  poll: 10
+  git:
+    depth: 1
+    dest: DocManager
+    repo: https://github.com/TransparencyToolkit/DocManager.git
+    umask: "0077"
+
+- name: Install our dependencies from apt
+  become: true
+  apt:
+    state: latest
+    install_recommends: no
+    name:
+      - postgresql # database used by DocManager for metadata
+      - postgresql-client # for pq/postgres gem
+      - libpq-dev         # for pq/postgres gem
+      - postgresql-contrib # hstore extension
+      - sudo # required for 'become'
+      - python-psycopg2 # for ansible postgres_db module
+      - apt-transport-https # for: elasticsearch
+      - curl # for: rbenv?
+      - libcurl4-openssl-dev # undeclared/missing dependency for curb gem
+
+- name: Include ElasticSearch role
+  include_role: name=elastic allow_duplicates=False
+
+- name: Include ruby role
+  include_role: name=our_ruby allow_duplicates=False
+
+- name: Ensure PostgreSQL service has started
+  become: true
+  service: name=postgresql state=started enabled=yes
+
+- name: DocManager - generate SECRET_KEY_BASE
+  shell: "xxd -ps -l 20 /dev/urandom"
+  register: secret_key_base_fh
+
+- name: "DocManager - set SECRET_KEY_BASE for production"
+  lineinfile:
+    dest: DocManager/config/secrets.yml
+    regexp: '  secret_key_base: <%= ENV\\["SECRET_KEY_BASE"\\] %>'
+    line: "  secret_key_base: '{{ secret_key_base_fh.stdout }}'"
+
+- name: DocManager - generate random postgres password
+  shell: "xxd -ps -l 16 /dev/urandom"
+  register: postgres_password_fh
+
+- name: DocManager - register postgres password fact
+  set_fact: postgres_password="{{ postgres_password_fh.stdout }}"
+
+- name: DocManager - provision postgres db
+  become: yes
+  become_user: postgres
+  postgresql_db:
+    encoding: UTF-8
+    name: "{{ postgres_db }}"
+    template: "template1"
+    # TODO can use "state: dump / target: /my/file.sql" to backup
+
+- name: "DocManager - provision hstore extension for db '{{ postgres_db }}'"
+  become: yes
+  become_user: postgres
+  postgresql_ext:
+    db: "{{ postgres_db }}"
+    name: hstore # technically also need plpgsql
+
+- name: DocManager - provision postgres user
+  become: yes
+  become_user: postgres
+  postgresql_user:
+    db: "{{ postgres_db }}"
+    name: "{{ postgres_username }}"
+    password: "{{ postgres_password }}"
+    priv: all
+    role_attr_flags: CREATEDB,SUPERUSER
+    # ^-- TODO make it not drop the DB so we can limit privs
+
+- name: "DocManager - allow unix socket logins with passwords for postgres user '{{ postgres_username }}'"
+  lineinfile:
+    dest: /etc/postgresql/9.6/main/pg_hba.conf
+    insertbefore: "^local\\s+all\\s+all\\s+.*peer$"
+    #line: "local\t{{ postgres_db }}\t{{ postgres_username }}\t\tmd5" # TODO
+    line: "local\tall\t{{ postgres_username }}\t\tmd5"
+
+- name: Ensure PostgreSQL service is reloaded after config changes
+  become: true
+  service: name=postgresql state=reloaded enabled=yes
+
+- name: DocManager - wait for git sync to complete
+  async_status:
+    jid: "{{ docmanager.ansible_job_id }}"
+  register: docmanager_result
+  until: docmanager_result.finished
+  retries: 300
+
+- name: DocManager - configure postgres credentials in app
+  template:
+    src: database.yml.j2
+    dest: DocManager/config/database.yml
+    mode: "0077"
+
+- name: DocManager - bundle install
+  command: chdir=DocManager creates=Gemfile.lock bash -lc 'bundle install'
+
+- name: DocManager - setup rake db stuff
+  shell: chdir=DocManager bash -lc 'rake db:create db:migrate'
+
+- name: Launch DocManager
+  command: chdir=DocManager bash -lc 'bundle exec puma --environment production --port 3000 & sleep 10'
+
+- name: Load Test-Data
+  command: chdir=Test-Data/test_sets/sidtoday_test_set/ bash -lc 'ruby sidtoday_index_script.rb'

@@ -1,0 +1,71 @@
+---
+# https://gist.github.com/marktheunissen/2979474
+# usage: ansible-playbook -v -c local LG.yml
+
+- name: LookingGlass - Install apt/package dependencies
+  apt:
+    become: true
+    state: latest
+    install_recommends: no
+    name:
+      - ca-certificates
+      - git
+      - tmux
+      - libmagic-dev # required by ruby-filemagic
+      - apt-transport-https # for: elasticsearch
+
+- name: Fetch LookingGlass source code
+  register: lookingglass
+  async: 3600
+  poll: 10
+  git:
+    depth: 1
+    dest: LookingGlass
+    repo: https://github.com/TransparencyToolkit/LookingGlass.git
+    umask: "0077"
+    recursive: no
+    track_submodules: no
+
+- name: Fetch Test-Data repository
+  register: testdata
+  async: 3600
+  poll: 10
+  git:
+    depth: 1
+    dest: Test-Data
+    repo: https://github.com/TransparencyToolkit/Test-Data.git
+    umask: "0077"
+
+- name: Install DocManager role
+  include_role: name=doc_manager allow_duplicates=False
+
+- name: Include ruby/rbenv role
+  include_role: name=our_ruby allow_duplicates=False
+
+- name: Ensure postgresql service has started
+  become: true
+  service: name=postgresql state=started enabled=yes
+
+  #      - name: Wait for git repositories to sync
+  #        retries: 60
+  #        delay: 60
+  #        until: docmanager.finished and lookingglass.finished and testdata.finished
+
+- name: LG - bundle install
+  command: chdir=LookingGlass bash -lc 'bundle install'
+
+- name: LG - change project index to nsadocs
+  lineinfile:
+    dest: LookingGlass/config/initializers/project_config.rb
+    regexp: 'ENV\\[\'PROJECT_INDEX\'\\] = "archive_test"' # TODO this doesn't work
+    line: "ENV['PROJECT_INDEX'] = 'nsadocs'"
+
+- name: LG - Generate simple form data
+  command: chdir=LookingGlass bash -lc 'rails generate simple_form:install --bootstrap'
+  # TODO creates?
+
+- name: LG - precompile assets
+  command: chdir=LookingGlass bash -lc 'rake assets:precompile'
+
+- name: Launch LookingGlass
+  command: chdir=LookingGlass bash -lc 'rails server --environment=development --daemon --port=3001'

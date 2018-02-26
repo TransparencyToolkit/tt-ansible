@@ -1,0 +1,46 @@
+---
+# Install ElasticSearch
+
+- name: Check if we need to fetch ElasticSearch GPG key
+  stat: path=/etc/apt/sources.list.d/elastic-6-x.list
+  register: elastic
+
+- name: Create temporary directory for ElasticSearch GPG key
+  when: not elastic.stat.exists
+  tempfile: state=directory suffix=.gpg
+  register: elastic_gpg_dir # elastic_gpg_dir.path
+  # todo umask: "0077" ?
+
+- name: Fetch ElasticSearch apt GPG key
+  when: not elastic.stat.exists
+  command:
+    gpg --homedir '{{elastic_gpg_dir.path}}'
+    --recv-key '4609 5ACC 8548 582C 1A26 99A9 D27D 666C D88E 42B4'
+
+- name: Install ElasticSearch APT GPG key (yolo)
+  become: true
+  when: not elastic.stat.exists
+  shell: 'gpg --homedir={{elastic_gpg_dir.path}} --export "4609 5ACC 8548 582C 1A26 99A9 D27D 666C D88E 42B4" | apt-key add >/dev/null'
+
+- name: Add ElasticSearch APT repository
+  become: true
+  when: not elastic.stat.exists
+  shell: echo "deb https://artifacts.elastic.co/packages/6.x/apt stable main" > /etc/apt/sources.list.d/elastic-6.x.list
+  args:
+    creates: /etc/apt/sources.list.d/elastic-6-x.list
+
+- name: Update package definitions and upgrade system packages
+  become: true
+  apt: install_recommends=no update_cache=yes cache_valid_time=3600
+
+- name: Install ElasticSearch package
+  apt:
+    state: latest
+    install_recommends: no
+    name:
+      - default-jre-headless # java for elasticsearch
+      - elasticsearch
+
+- name: Ensure ElasticSearch service has started
+  become: true
+  service: name=elasticsearch state=started enabled=yes

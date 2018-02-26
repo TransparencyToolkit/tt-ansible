@@ -1,0 +1,8 @@
+---
+# usage: ansible-playbook -v -c local LookingGlass.yml
+
+- name: LookingGlass installation (with test data)
+  hosts: localhost
+  gather_facts: no
+  roles:
+    - looking_glass

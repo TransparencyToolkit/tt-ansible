@@ -1,0 +1,50 @@
+---
+# install and configure the OCRServer component of Transparency Toolkit
+
+- name: install dependencies
+  apt:
+    state: latest
+    install_recommends: no
+    name:
+      - graphicsmagick
+      - poppler-data
+      - ghostscript
+      - tesseract
+      - pdftk
+      - openjdk-8-jre
+      - openjdk-8-jdk
+      - libreoffice
+      - libcurl3
+      - libcurl3-gnutls
+      - libcurl4-openssl-dev
+
+- name: make sure we have ruby
+  include_role: our_ruby
+
+- name: fetch tika-server keys
+  command: # from 'bob' from https://people.apache.org/keys/group/tika.asc
+    gpg --homedir '{{tika_gpg_dir}}'
+        --recv-key '33303721259613C56B2860483F902C276ED9BE21'
+
+- name: fetch tika-server signature
+  command:
+    curl 'http://www.apache.org/dist/tika/tika-server-1.17.jar.asc'
+         -o tika-server-1.17.jar.asc
+
+- name: fetch tika-server jar file
+  command:
+    curl 'http://www.apache.org/dist/tika/tika-server-1.17.jar'
+         -o tika-server-1.17.jar
+
+- name: verify tika-server signature
+  command: gpg --verify tika-server-1.17.jar tika-server-1.17.jar.asc
+
+- name: install ruby gem dependencies
+  command: bash -lc 'gem install doc_integrity_check mimemagic docsplit curb'
+
+# TODO Set the gpg_recipient key ID and lookingglass_url in the config.ru file
+
+- name: rackup
+  command: bash -lc 'rackup config.ru'
+
+# TODO see OCRServer README for details on how to test

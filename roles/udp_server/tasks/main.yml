@@ -1,0 +1,26 @@
+---
+# https://github.com/TransparencyToolkit/UDPServer
+# requires curl
+#  Ensure curl is installed and that the doc_integrity_check and curb gems are installed.
+
+- name: Fetch UDPServer source code
+  register: udpserver
+  async: 3600
+  poll: 10
+  git:
+	  depth: 1
+	  dest: UDPServer
+	  repo: https://github.com/TransparencyToolkit/UDPServer
+	  umask: "0077"
+
+- name: Install required gems
+  become: true
+	command: bash -lc 'gem install doc_integrity_check curb'
+
+- name: Wait for git repos to sync
+  retries: 60
+  delay: 60
+  until: udpserver.finished
+
+#- name: Bring it up
+#  command: chdir=UDPServer bash -lc 'rackup -p 9797'

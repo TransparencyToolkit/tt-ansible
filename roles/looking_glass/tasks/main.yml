@@ -57,7 +57,7 @@
 - name: LG - change project index to nsadocs
   lineinfile:
     dest: LookingGlass/config/initializers/project_config.rb
-    regexp: 'ENV\\[\'PROJECT_INDEX\'\\] = "archive_test"' # TODO this doesn't work
+    regexp: 'ENV\\[''PROJECT_INDEX''\\] = "archive_test"' # TODO this doesn't work
     line: "ENV['PROJECT_INDEX'] = 'nsadocs'"
 
 - name: LG - Generate simple form data

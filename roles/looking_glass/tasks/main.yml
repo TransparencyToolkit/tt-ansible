@@ -3,8 +3,8 @@
 # usage: ansible-playbook -v -c local LG.yml
 
 - name: LookingGlass - Install apt/package dependencies
+  become: true
   apt:
-    become: true
     state: latest
     install_recommends: no
     name:

@@ -104,7 +104,7 @@
     mode: "0077"
 
 - name: DocManager - bundle install
-  command: chdir=DocManager creates=Gemfile.lock bash -lc 'bundle install'
+  command: chdir=DocManager bash -lc 'bundle install'
 
 - name: DocManager - setup rake db stuff
   shell: chdir=DocManager bash -lc 'rake db:create db:migrate'

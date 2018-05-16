@@ -1,6 +1,5 @@
 ---
 # https://gist.github.com/marktheunissen/2979474
-# usage: ansible-playbook -v -c local LG.yml
 
 - name: LookingGlass - Install apt/package dependencies
   become: true

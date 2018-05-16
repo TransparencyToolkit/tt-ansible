@@ -1,5 +1,5 @@
 ---
-# usage: ansible-playbook -v -c local LookingGlass.yml
+# usage: ansible-playbook -v --ask-become-pass -c local LookingGlass.yml
 
 - name: LookingGlass installation (with test data)
   hosts: localhost

@@ -7,12 +7,12 @@
 ```shell
 apt-get update \
   && apt-get install -y -q --no-install-recommends ansible python-apt \
-  && ansible-playbook --become -c local LookingGlass.yml
+  && ansible-playbook -v --ask-become-pass -c local LookingGlass.yml
 ```
 
 Check that everything is up to date:
 ```shell
-ansible-playbook --check --become -c local LookingGlass.yml
+ansible-playbook --check -v --ask-become-pass -c local LookingGlass.yml
 ```
 
 ## TODO NOTES

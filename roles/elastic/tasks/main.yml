@@ -7,12 +7,14 @@
 
 - name: Create temporary directory for ElasticSearch GPG key
   when: not elastic.stat.exists
+  become: true # root needs to own everything here
   tempfile: state=directory suffix=.gpg
   register: elastic_gpg_dir # elastic_gpg_dir.path
   # todo umask: "0077" ?
 
 - name: Fetch ElasticSearch apt GPG key
   when: not elastic.stat.exists
+  become: true # root needs to own everything here
   command:
     gpg --homedir '{{elastic_gpg_dir.path}}'
     --recv-key '4609 5ACC 8548 582C 1A26 99A9 D27D 666C D88E 42B4'

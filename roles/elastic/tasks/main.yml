@@ -31,9 +31,9 @@
   args:
     creates: /etc/apt/sources.list.d/elastic-6-x.list
 
-- name: Update package definitions and upgrade system packages
+- name: Force-update package definitions to learn of the elasticsearch pkg
   become: true
-  apt: install_recommends=no update_cache=yes cache_valid_time=3600
+  apt: install_recommends=no update_cache=yes cache_valid_time=0
 
 - name: Install ElasticSearch package
   become: true

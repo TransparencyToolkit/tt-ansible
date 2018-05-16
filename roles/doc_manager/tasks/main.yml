@@ -75,13 +75,21 @@
     db: "{{ postgres_db }}"
     name: "{{ postgres_username }}"
     password: "{{ postgres_password }}"
+    encrypted: yes # required for pg >= 10
     priv: all
     role_attr_flags: CREATEDB,SUPERUSER
     # ^-- TODO make it not drop the DB so we can limit privs
 
+- name: DocManager - learn location of postgres' hba.conf
+  become: true
+  become_user: postgres
+  shell: chdir=/ psql -P format=unaligned -tc 'show hba_file;'
+  register: postgres_hba_cmd
+
 - name: "DocManager - allow unix socket logins with passwords for postgres user '{{ postgres_username }}'"
+  become: true
   lineinfile:
-    dest: /etc/postgresql/9.6/main/pg_hba.conf
+    dest: "{{ postgres_hba_cmd.stdout }}"
     insertbefore: "^local\\s+all\\s+all\\s+.*peer$"
     #line: "local\t{{ postgres_db }}\t{{ postgres_username }}\t\tmd5" # TODO
     line: "local\tall\t{{ postgres_username }}\t\tmd5"
@@ -101,7 +109,7 @@
   template:
     src: database.yml.j2
     dest: DocManager/config/database.yml
-    mode: "0077"
+    mode: "0600"
 
 - name: DocManager - bundle install
   command: chdir=DocManager bash -lc 'bundle install'

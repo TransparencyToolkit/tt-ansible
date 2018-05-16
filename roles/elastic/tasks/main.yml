@@ -34,6 +34,7 @@
   apt: install_recommends=no update_cache=yes cache_valid_time=3600
 
 - name: Install ElasticSearch package
+  become: true
   apt:
     state: latest
     install_recommends: no

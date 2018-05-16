@@ -1,7 +1,8 @@
 ---
 # Install and configure target ruby version using 'rbenv'
 
-- name: Install rbenv
+- name: Install rbenv dependencies from apt
+  become: true
   apt:
     state: latest
     install_recommends: no

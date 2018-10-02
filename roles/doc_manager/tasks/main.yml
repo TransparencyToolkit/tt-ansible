@@ -4,6 +4,7 @@
   async: 3600
   poll: 10
   git:
+    force: yes # because this ghetto stuff modifies files inside the git repo
     depth: 1
     dest: DocManager
     repo: https://github.com/TransparencyToolkit/DocManager.git

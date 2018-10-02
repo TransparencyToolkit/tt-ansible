@@ -14,8 +14,8 @@
 - name: Create temporary directory for rvm PGP keys
   when: not rvm.stat.exists
   tempfile: state=directory suffix=.rvm.gpg
-  register: rvm_gpg_dir # elastic_gpg_dir.path
-  umask: "0077"
+  register: rvm_gpg_dir # rvm_gpg_dir.path
+  # umask: "0077" TODO ?
 
 - name: Fetch rvm.io PGP keys
   command: gpg --homedir '{{rvm_gpg_dir.path}}' \

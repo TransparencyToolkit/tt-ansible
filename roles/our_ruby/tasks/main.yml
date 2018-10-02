@@ -12,11 +12,16 @@
       - libcurl4-openssl-dev # undeclared/missing dependency for curb gem
 
 - name: Fetch rvm.io PGP keys
-  command: gpg --keyserver hkps://hkps.pool.sks-keyservers.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
+  command: gpg --keyserver hkps://hkps.pool.sks-keyservers.net \
+    --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 \
+                7D2BAF1CF37B13E2069D6956105BD0E739499BDB
   # TODO should pin CA?
 
 - name: Make GPG -trust- the keys.
-  command: gpg --batch --import-ownertrust <<<$'7D2BAF1CF37B13E2069D6956105BD0E739499BDB:5:\n409B6B1796C275462A1703113804BB82D39DC0E3:5:'
+  command: gpg --batch --import-ownertrust
+  args:
+    stdin: "7D2BAF1CF37B13E2069D6956105BD0E739499BDB:5:\n\
+            409B6B1796C275462A1703113804BB82D39DC0E3:5:"
 
 - name: Fetch rvm.io install script
   get_url:

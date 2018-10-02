@@ -62,7 +62,7 @@
     mode: u=rx
     src: "{{ stanford_ner_version }}.zip"
 
-#cd stanford-ner-2018-02-7/ && java -mx1000m -cp stanford-ner.jar:lib/* edu.stanford.nlp.ie.NERServer -loadClassifier classifiers/english.all.3class.distsim.crf.ser.gz -port 9002 -outputFormat inlineXML
+#TODO make service: cd stanford-ner-2018-02-7/ && java -mx1000m -cp stanford-ner.jar:lib/* edu.stanford.nlp.ie.NERServer -loadClassifier classifiers/english.all.3class.distsim.crf.ser.gz -port 9002 -outputFormat inlineXML
 
 - name: Catalyst - Install DocManager role
   include_role: name=doc_manager allow_duplicates=False
@@ -88,5 +88,44 @@
 - name: Catalyst - rake db:reset
   command: chdir=Catalyst bash -lc 'rake db:reset'
 
-- name: Launch Catalyst
-  command: chdir=Catalyst bash -lc 'rails server --environment=development --daemon --port=9004'
+- name: Catalyst - generate SECRET_KEY_BASE
+  shell: "xxd -ps -l 20 /dev/urandom"
+  register: catalyst_secret_key_base_fh
+
+- name: Catalyst - set SECRET_KEY_BASE systemd conf
+  become: true
+  lineinfile:
+    create: yes
+    present: yes
+    mode: ug=r,o=
+    dest: /etc/systemd/system/catalyst.service.d/secret-key-base.conf
+    regexp: '^SECRET_KEY_BASE='
+    line: "SECRET_KEY_BASE='{{ catalyst_secret_key_base_fh.stdout }}'"
+
+- name: Catalyst - set DOCMANAGER_URL systemd conf
+  become: true
+  lineinfile:
+    create: yes
+    present: yes
+    mode: ug=r,o=
+    dest: /etc/systemd/system/catalyst.service.d/docmanager-url.conf
+    regexp: '^DOCMANAGER_URL='
+    line: "DOCMANAGER_URL='{{ docmanager_url }}'"
+
+- name: Install Catalyst service
+  become: true
+  template:
+    src: catalyst.service.j2
+    dest: /usr/lib/systemd/system/catalyst.service
+    mode: ugo=r
+
+- name: Restart Catalyst systemd service
+  become: true
+  systemd:
+    state: restarted
+    daemon_reload: yes
+    name: catalyst
+
+- name: Ensure Catalyst service has started
+  become: true
+  service: name=elasticsearch state=started enabled=yes

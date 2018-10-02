@@ -1,5 +1,16 @@
 ---
 
-cwd: "{{ lookup('env', 'PWD') }}"
+# Version of Stanford NER to use (this must be available
+#   as ${stanford_ner_version}.zip on their webpage):
 
 stanford_ner_version: 'stanford-ner-2018-02-27'
+
+
+# the username under which the Catalyst systemd service
+# should run the Catalyst server:
+
+catalyst_user: tt
+
+
+# TODO this is a hack to have somewhere to put this stuff
+cwd: "{{ lookup('env', 'PWD') }}"

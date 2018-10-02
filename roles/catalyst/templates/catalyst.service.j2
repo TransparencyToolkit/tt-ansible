@@ -1,0 +1,22 @@
+[Unit]
+Description=Transparency Toolkit Catalyst
+Requires=network.target
+After=syslog.target network.target
+[Service]
+Type=forking
+
+# Note that environment variables are sourced from
+# /etc/systemd/system/catalyst.service.d/*.conf
+
+User={{ catalyst_user }}
+
+PIDFile=/run/tt.catalyst.pid
+
+ExecStart=bash -lc 'cd {{cwd}}/Catalyst && rails server --environment=development --pid=/run/tt.catalyst.pid --daemon --port=9004'
+
+ExecRestart=bash -lc 'cd {{cwd}}/Catalyst && rails restart'
+
+ExecStop=bash -lc 'cd {{cwd}}/Catalyst && rails -e "exit 0"'
+
+[Install]
+WantedBy=multi-user.target

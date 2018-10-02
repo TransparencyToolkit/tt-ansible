@@ -1,39 +1,50 @@
 ---
-# Install and configure target ruby version using 'rbenv'
+# Install and configure target ruby version using 'rvm'
 
-- name: Install rbenv dependencies from apt
+- name: Install rvm dependencies from apt
   become: true
   apt:
     state: latest
     install_recommends: no
     name:
-      - rbenv
       - curl
-      - ruby-build # for: 'rbenv install'
-      - libssl-dev # for: 'rbenv install'
+      - sudo
       - libcurl4-openssl-dev # undeclared/missing dependency for curb gem
 
-# gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
-#gpg2 --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3
+- name: Fetch rvm.io PGP keys
+  command: gpg --keyserver hkps://hkps.pool.sks-keyservers.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
+  # TODO should pin CA?
 
-- name: install target ruby version with rbenv
-  command: rbenv install --skip-existing {{ ruby_version }}
+- name: Make GPG -trust- the keys.
+  command: gpg --batch --import-ownertrust <<<$'7D2BAF1CF37B13E2069D6956105BD0E739499BDB:5:\n409B6B1796C275462A1703113804BB82D39DC0E3:5:'
 
-- name: enable target ruby version locally for this user with rbenv
-  command: rbenv local {{ ruby_version }}
+- name: Fetch rvm.io install script
+  get_url:
+    url: https://raw.githubusercontent.com/rvm/rvm/master/binscripts/rvm-installer
+    dest: rvm-installer
+    mode: u=rx
 
-- shell: fgrep 'rbenv()' ~/.bashrc
-  register: has_rbenv_stub
-  ignore_errors: True
-  # TODO replace with lineinfile or whatever
+- name: Fetch rvm.io install script SIGNATURE
+  get_url:
+    url: https://raw.githubusercontent.com/rvm/rvm/master/binscripts/rvm-installer.asc
+    dest: rvm-installer.asc
+    mode: u=rx
 
-- name: add rbenv init to ~/.bashrc and ~/.profile
-  shell: 'rbenv init - >> ~/.bashrc && rbenv init - >> ~/.profile'
-  when: has_rbenv_stub is failed
-  # TODO for root too
+- name: Verify rvm.io install script SIGNATURE
+  command: gpg --batch --verify rvm-installer.asc rvm-installer
+
+# TODO should probably run this as root (with become: true), and then figure out how to make rvm install itself into the user's profile instead)
+- name: Install rvm
+  command: bash rvm-installer
+
+- name: install target ruby version
+  command: rvm install {{ ruby_version }}
+
+- name: enable target ruby version
+  command: rvm alias create default {{ ruby_version }}
 
 - name: ensure target ruby version is being used
-  command: bash -lc 'ruby -v | fgrep {{ ruby_version }}'
+  command: bash -lc 'ruby -v | fgrep --line-regexp {{ ruby_version }}'
 
 - name: install bundler
   command: bash -lc 'gem install bundler'

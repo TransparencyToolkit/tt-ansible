@@ -1,0 +1,5 @@
+---
+
+cwd: "{{ lookup('env', 'PWD') }}"
+
+stanford_ner_version: 'stanford-ner-2018-02-27'

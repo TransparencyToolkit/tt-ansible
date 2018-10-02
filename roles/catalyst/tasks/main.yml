@@ -38,29 +38,33 @@
     checksum: sha256:e37b0094040c95e98799d849a7be2f4967de6b786f0b07360d179756bd4dce95
     mode: u=r
     timeout: 25
-    dest: stanford-ner-2018-02-27.zip
-    url: https://nlp.stanford.edu/software/stanford-ner-2018-02-27.zip
+    dest: "{{ cwd }}/{{ stanford_ner_version }}.zip"
+    url: "https://nlp.stanford.edu/software/{{ stanford_ner_version }}.zip"
     validate_certs: yes
+# TODO fetch iff (dest doesn't exist || checksum doesn't match)
 # TODO check stanford_ner.checksum_dest && stanford_ner.size == 179695580
 # sha1:80d8d4aebb6812ee43ceff0f7c611ed86256bd72
+
+- name: Catalyst - make directory for Stanford NER
+  file: path="{{ cwd }}/{{ stanford_ner_version }}" state=directory
 
 # we keep the date in the folder name to ensure that an update to this
 # role will fetch the most recent version specified here.
 - name: Catalyst - unzip Stanford NER
   unarchive:
     copy: no
-    creates: stanford-ner-2018-02-27/
+    creates: "{{ cwd }}/{{ stanford_ner_version }}/"
     decrypt: no
-    dest: stanford-ner-2018-02-27/
+    dest: "{{ cwd }}/{{ stanford_ner_version }}/"
     mode: u=rx
-    src: stanford-ner-2018-02-27.zip
+    src: "{{ stanford_ner_version }}.zip"
 
 #cd stanford-ner-2018-02-7/ && java -mx1000m -cp stanford-ner.jar:lib/* edu.stanford.nlp.ie.NERServer -loadClassifier classifiers/english.all.3class.distsim.crf.ser.gz -port 9002 -outputFormat inlineXML
 
 - name: Catalyst - Install DocManager role
   include_role: name=doc_manager allow_duplicates=False
 
-- name: Catalyst - Include ruby/rbenv role
+- name: Catalyst - Include ruby role
   include_role: name=our_ruby allow_duplicates=False
 
   #      - name: Wait for git repositories to sync

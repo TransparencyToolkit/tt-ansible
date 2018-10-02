@@ -15,8 +15,7 @@
 - name: Fetch ElasticSearch apt GPG key
   when: not elastic.stat.exists
   become: true # root needs to own everything here
-  command:
-    gpg --homedir '{{elastic_gpg_dir.path}}'
+  command: gpg --homedir '{{elastic_gpg_dir.path}}' \
     --recv-key '4609 5ACC 8548 582C 1A26 99A9 D27D 666C D88E 42B4'
 
 - name: Install ElasticSearch APT GPG key (yolo)

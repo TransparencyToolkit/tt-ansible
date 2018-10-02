@@ -30,7 +30,6 @@
     recursive: no
     track_submodules: no
 
-  https://nlp.stanford.edu/software/stanford-ner-2018-02-27.zip
 - name: Catalyst - Fetch Stanford NER zip-file
   register: stanford_ner
   async: 3600
@@ -40,7 +39,7 @@
     mode: u=r
     timeout: 25
     dest: stanford-ner-2018-02-27.zip
-    url: https://github.com/TransparencyToolkit/Test-Data.git
+    url: https://nlp.stanford.edu/software/stanford-ner-2018-02-27.zip
     validate_certs: yes
 # TODO check stanford_ner.checksum_dest && stanford_ner.size == 179695580
 # sha1:80d8d4aebb6812ee43ceff0f7c611ed86256bd72

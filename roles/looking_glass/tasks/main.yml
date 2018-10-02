@@ -38,7 +38,7 @@
 - name: Install DocManager role
   include_role: name=doc_manager allow_duplicates=False
 
-- name: Include ruby/rbenv role
+- name: Include ruby role
   include_role: name=our_ruby allow_duplicates=False
 
 - name: Ensure postgresql service has started

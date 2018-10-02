@@ -1,26 +1,30 @@
 ---
-# https://github.com/TransparencyToolkit/UDPServer
+# https://github.com/TransparencyToolkit/IndexServer
 # requires curl
 #  Ensure curl is installed and that the doc_integrity_check and curb gems are installed.
 
-- name: Fetch UDPServer source code
-  register: udpserver
+- name: Fetch IndexServer source code
+  register: indexserver
   async: 3600
   poll: 10
   git:
 	  depth: 1
-	  dest: UDPServer
-	  repo: https://github.com/TransparencyToolkit/UDPServer
+	  dest: IndexServer
+	  repo: https://github.com/TransparencyToolkit/IndexServer
 	  umask: "0077"
 
 - name: Install required gems
   become: true
-	command: bash -lc 'gem install doc_integrity_check curb'
+	command: bash -lc 'gem install doc_integrity_check curb sinatra'
 
 - name: Wait for git repos to sync
   retries: 60
   delay: 60
-  until: udpserver.finished
+  until: indexserver.finished
+
+# TODO: In config.ru, set the DOCMANAGER_URL environment variable to the url
+#       for DocManager
+# ENV["DOCMANAGER_URL"] = "http://localhost:3000"
 
 #- name: Bring it up
-#  command: chdir=UDPServer bash -lc 'rackup -p 9797'
+#  command: chdir=IndexServer bash -lc 'rackup -p 9494'

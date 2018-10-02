@@ -1,0 +1,83 @@
+---
+## depends on rails, ruby, jdk, jre
+## depends on DocManager, ?LG?
+
+- name: Catalyst - Install apt/package dependencies
+  become: true
+  apt:
+    state: latest
+    install_recommends: no
+    name:
+      - sqlite3
+      - libsqlite3-dev
+      - libidn11-dev
+      - hunspell
+      - libcurl3
+      - libcurl3-gnutls
+      - libcurl4-openssl-dev
+      - default-jre-headless # java for Stanford NER
+      - default-jdk-headless # java for Stanford NER (TODO jdk needed?)
+
+- name: Fetch Catalyst source code
+  register: catalyst
+  async: 3600
+  poll: 10
+  git:
+    depth: 1
+    dest: LookingGlass
+    repo: https://github.com/TransparencyToolkit/Catalyst.git
+    umask: "0077"
+    recursive: no
+    track_submodules: no
+
+  https://nlp.stanford.edu/software/stanford-ner-2018-02-27.zip
+- name: Catalyst - Fetch Stanford NER zip-file
+  register: stanford_ner
+  async: 3600
+  poll: 10
+  get_url:
+    checksum: sha256:e37b0094040c95e98799d849a7be2f4967de6b786f0b07360d179756bd4dce95
+    mode: u=r
+    timeout: 25
+    dest: stanford-ner-2018-02-27.zip
+    url: https://github.com/TransparencyToolkit/Test-Data.git
+    validate_certs: yes
+# TODO check stanford_ner.checksum_dest && stanford_ner.size == 179695580
+# sha1:80d8d4aebb6812ee43ceff0f7c611ed86256bd72
+
+# we keep the date in the folder name to ensure that an update to this
+# role will fetch the most recent version specified here.
+- name: Catalyst - unzip Stanford NER
+  unarchive:
+    copy: no
+    creates: stanford-ner-2018-02-27/
+    decrypt: no
+    dest: stanford-ner-2018-02-27/
+    mode: u=rx
+    src: stanford-ner-2018-02-27.zip
+
+#cd stanford-ner-2018-02-7/ && java -mx1000m -cp stanford-ner.jar:lib/* edu.stanford.nlp.ie.NERServer -loadClassifier classifiers/english.all.3class.distsim.crf.ser.gz -port 9002 -outputFormat inlineXML
+
+- name: Catalyst - Install DocManager role
+  include_role: name=doc_manager allow_duplicates=False
+
+- name: Catalyst - Include ruby/rbenv role
+  include_role: name=our_ruby allow_duplicates=False
+
+  #      - name: Wait for git repositories to sync
+  #        retries: 60
+  #        delay: 60
+  #        until: docmanager.finished and lookingglass.finished and testdata.finished
+
+- name: Catalyst - bundle install
+  command: chdir=Catalyst bash -lc 'bundle install'
+
+- name: Catalyst - rake db:setup
+  command: chdir=Catalyst bash -lc 'rake db:create'
+
+# TODO are we sure we want to reset automatically?
+- name: Catalyst - rake db:reset
+  command: chdir=Catalyst bash -lc 'rake db:reset'
+
+- name: Launch Catalyst
+  command: chdir=Catalyst bash -lc 'rails server --environment=development --daemon --port=9004'

@@ -11,17 +11,23 @@
       - sudo
       - libcurl4-openssl-dev # undeclared/missing dependency for curb gem
 
+- name: Create temporary directory for rvm PGP keys
+  when: not rvm.stat.exists
+  tempfile: state=directory suffix=.rvm.gpg
+  register: rvm_gpg_dir # elastic_gpg_dir.path
+  umask: "0077"
+
 - name: Fetch rvm.io PGP keys
-  command: gpg --keyserver hkps://hkps.pool.sks-keyservers.net \
+  command: gpg --homedir '{{rvm_gpg_dir.path}}' \
+    --keyserver hkps://hkps.pool.sks-keyservers.net \
     --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 \
                 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
   # TODO should pin CA?
 
 - name: Make GPG -trust- the keys.
-  command: gpg --batch --import-ownertrust
-  args:
-    stdin: "7D2BAF1CF37B13E2069D6956105BD0E739499BDB:5:\n\
-            409B6B1796C275462A1703113804BB82D39DC0E3:5:"
+  command: echo "7D2BAF1CF37B13E2069D6956105BD0E739499BDB:5:\n\
+                 409B6B1796C275462A1703113804BB82D39DC0E3:5:" \
+           | gpg --homedir '{{ rvm_gpg_dir.path }}' --batch --import-ownertrust
 
 - name: Fetch rvm.io install script
   get_url:
@@ -36,7 +42,8 @@
     mode: u=rx
 
 - name: Verify rvm.io install script SIGNATURE
-  command: gpg --batch --verify rvm-installer.asc rvm-installer
+  command: gpg --homedir '{{ rvm_gpg_dir.path }}' --batch \
+               --verify rvm-installer.asc rvm-installer
 
 # TODO should probably run this as root (with become: true), and then figure out how to make rvm install itself into the user's profile instead)
 - name: Install rvm

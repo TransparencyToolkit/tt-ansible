@@ -24,7 +24,7 @@
   poll: 10
   git:
     depth: 1
-    dest: LookingGlass
+    dest: Catalyst
     repo: https://github.com/TransparencyToolkit/Catalyst.git
     umask: "0077"
     recursive: no

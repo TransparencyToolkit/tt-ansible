@@ -65,7 +65,7 @@
   command: rvm alias create default {{ ruby_version }}
 
 - name: ensure target ruby version is being used
-  command: bash -lc "ruby -v | grep \
+  command: bash -lc "ruby -v | grep
     '^ruby {{ ruby_version.replace('.','\.') }}'"
 
 - name: install bundler

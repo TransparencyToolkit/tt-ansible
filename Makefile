@@ -1,3 +1,5 @@
+.POSIX:
+
 .PHONY: lint LookingGlass Catalyst
 
 lint:

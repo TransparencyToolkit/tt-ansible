@@ -8,7 +8,7 @@
 - name: Create temporary directory for ElasticSearch GPG key
   when: not elastic.stat.exists
   become: true # root needs to own everything here
-  tempfile: state=directory suffix=.gpg
+  tempfile: state=directory suffix=.elastic.gpg
   register: elastic_gpg_dir # elastic_gpg_dir.path
   # todo umask: "0077" ?
 

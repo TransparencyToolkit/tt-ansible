@@ -7,7 +7,8 @@
 ```shell
 apt-get update \
   && apt-get install -y -q --no-install-recommends ansible python-apt \
-  && ansible-playbook -v --ask-become-pass -c local LookingGlass.yml
+  && make lint \
+  && make LookingGlass
 ```
 
 Check that everything is up to date:

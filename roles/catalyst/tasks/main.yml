@@ -17,6 +17,9 @@
       - libcurl4-openssl-dev
       - default-jre-headless # java for Stanford NER
       - default-jdk-headless # java for Stanford NER (TODO jdk needed?)
+      - automake # bundle install cld
+      - autoconf # bundle install cld
+      - aclocal  # bundle install cld
 
 - name: Fetch Catalyst source code
   register: catalyst
@@ -71,6 +74,9 @@
   #        retries: 60
   #        delay: 60
   #        until: docmanager.finished and lookingglass.finished and testdata.finished
+
+- name: Catalyst - gem install cld working around obv wrong C code
+  command: bash -lc 'CXXFLAGS=-Wno-narrowing gem install cld -v 0.7.0'
 
 - name: Catalyst - bundle install
   command: chdir=Catalyst bash -lc 'bundle install'

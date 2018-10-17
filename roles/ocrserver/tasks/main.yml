@@ -28,18 +28,15 @@
   register: tika
 
 - name: Create temporary directory for Tika GPG key
-  when: not tika.stat.exists
   tempfile: state=directory suffix=.tika.gpg
   register: tika_gpg_dir # tika_gpg_dir.path
 
 - name: fetch tika-server keys
-  when: not tika.stat.exists
   command: # from 'bob' from https://people.apache.org/keys/group/tika.asc
     gpg --homedir '{{ tika_gpg_dir.path }}'
         --recv-key '833C1CC4926C1DDE29BB8731E4032DC4EF0CF38A'
 
 - name: fetch tika-server signature
-  when: not tika.stat.exists
   command:
     curl 'https://archive.apache.org/dist/tika/tika-server-{{ tika_version }}.jar.asc'
          -o tika-server-{{ tika_version }}.jar.asc
@@ -53,7 +50,8 @@
 - name: verify tika-server signature
   command:
     gpg --homedir '{{ tika_gpg_dir.path }}'
-        --verify tika-server-{{ tika_version }}.jar.asc tika-server-{{ tika_version }}.jar
+        --verify 'tika-server-{{ tika_version }}.jar.asc'
+        'tika-server-{{ tika_version }}.jar'
 
 - name: install ruby gem dependencies
   command: bash -lc 'gem install doc_integrity_check mimemagic docsplit curb'

@@ -25,34 +25,35 @@
 
 - name: Check if we need to fetch Tika
   stat: path=tika-server-{{ tika_version }}.jar.asc
-  register: elastic
+  register: tika
 
 - name: Create temporary directory for Tika GPG key
   when: not tika.stat.exists
-  become: true # root needs to own everything here
   tempfile: state=directory suffix=.tika.gpg
   register: tika_gpg_dir # tika_gpg_dir.path
 
 - name: fetch tika-server keys
   when: not tika.stat.exists
   command: # from 'bob' from https://people.apache.org/keys/group/tika.asc
-    gpg --homedir '{{tika_gpg_dir}}'
+    gpg --homedir '{{ tika_gpg_dir.path }}'
         --recv-key '33303721259613C56B2860483F902C276ED9BE21'
 
 - name: fetch tika-server signature
   when: not tika.stat.exists
   command:
-    curl 'http://www.apache.org/dist/tika/tika-server-{{ tika_version }}.jar.asc'
+    curl 'https://archive.apache.org/dist/tika/tika-server-{{ tika_version }}.jar.asc'
          -o tika-server-{{ tika_version }}.jar.asc
 
 - name: fetch tika-server jar file
   when: not tika.stat.exists
   command:
-    curl 'http://www.apache.org/dist/tika/tika-server-1.17.jar'
+    curl 'https://archive.apache.org/dist/tika/tika-server-{{ tika_version }}.jar'
          -o tika-server-{{ tika_version }}.jar
 
 - name: verify tika-server signature
-  command: gpg --verify tika-server-{{ tika_version }}.jar tika-server-{{ tika_version }}.jar.asc
+  command:
+    gpg --homedir '{{ tika_gpg_dir.path }}'
+        --verify tika-server-{{ tika_version }}.jar.asc tika-server-{{ tika_version }}.jar
 
 - name: install ruby gem dependencies
   command: bash -lc 'gem install doc_integrity_check mimemagic docsplit curb'

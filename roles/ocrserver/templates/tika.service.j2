@@ -11,8 +11,6 @@ Type=simple
 User={{ ocrserver_user }}
 WorkingDirectory={{ cwd }}
 
-#PIDFile=/run/tt.tika.pid
-
 ExecStart=/bin/bash -lc 'java -jar tika-server-{{ tika_version }}.jar'
 # TODO look into `jsvc` here maybe
 

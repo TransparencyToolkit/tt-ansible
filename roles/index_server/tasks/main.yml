@@ -34,6 +34,8 @@
     dest: /usr/lib/systemd/system/indexserver.service
     mode: ugo=r
 
+# sudo mkdir -p /etc/systemd/system/indexserver.service.d
+
 - name: set DOCMANAGER_URL systemd conf
   become: true
   blockinfile:

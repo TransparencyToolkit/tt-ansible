@@ -13,9 +13,9 @@ WorkingDirectory={{ cwd }}/IndexServer/
 
 PIDFile=/run/indexserver/indexserver.pid
 
-ExecStart=/bin/bash -lc 'rackup --environment=development --pid=/run/indexserver/indexserver.pid --daemon --port=9494'
+ExecStart=/bin/bash -lc 'rackup --env=development --pid=/run/indexserver/indexserver.pid --daemonize --port=9494'
 
-ExecRestart=/bin/bash -lc 'rails restart'
+#ExecRestart=/bin/bash -lc 'rails restart'
 
 ExecStop=/bin/bash -lc 'rackup -e "exit 0"'
 

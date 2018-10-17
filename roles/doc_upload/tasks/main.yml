@@ -35,10 +35,10 @@
       [Service]
       Environment="{{item.name}}='{{ item.value }}'"
   with_items:
-    - {name: 'ocrserver_url', value: ocrserver_url }
-    - {name: 'gpg_signer', value: gpg_signer }
-    - {name: 'gpg_recipient', value: gpg_recipient }
-    - {name: 'lookingglass_url', value: lookingglass_url }
+    - {name: 'ocrserver_url', value: '{{ocrserver_url}}' }
+    - {name: 'gpg_signer', value: '{{gpg_signer}}' }
+    - {name: 'gpg_recipient', value: '{{gpg_recipient}}' }
+    - {name: 'lookingglass_url', value: '{{lookingglass_url}}' }
 
 - name: Wait for git repos to sync
   async_status:

@@ -16,6 +16,19 @@ Check that everything is up to date:
 ansible-playbook --check -v --ask-become-pass -c local LookingGlass.yml
 ```
 
+## Environment variable overrides
+
+You can override a variety of default settings by appending to files in `/etc/systemd/MY.SERVICE.service.d/*`, or by creating new files in those directories.
+To override the default, append your line **after** `# END ANSIBLE MANAGED BLOCK`. The ansible scripts will update those sections with the upstream defaults, so custom changes have to be below those.
+Example: `/etc/systemd/system/docupload.service.d/gpg_signer.conf`:
+```systemd
+# BEGIN ANSIBLE MANAGED BLOCK
+[Service]
+Environment="gpg_signer='12345678'"
+# END ANSIBLE MANAGED BLOCK
+Environment="gpg_signer='my-real-keygrip-here'"
+```
+
 ## TODO NOTES
 - provision postgres users with lower privs
 - http://docs.ansible.com/ansible/latest/index.html

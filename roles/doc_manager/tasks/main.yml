@@ -139,7 +139,7 @@
     dest: /etc/systemd/system/docmanager.service.d/secret-key-base.conf
     content: |
       [Service]
-      Environment=\"SECRET_KEY_BASE='{{ docmanager_secret_key_base_fh.stdout }}'"
+      Environment="SECRET_KEY_BASE='{{ docmanager_secret_key_base_fh.stdout }}'"
 
 - name: Restart DocManager systemd service
   become: true

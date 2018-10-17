@@ -1,0 +1,7 @@
+---
+
+- name: DocUpload  installation
+  hosts: localhost
+  gather_facts: no
+  roles:
+    - doc_upload

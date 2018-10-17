@@ -1,8 +1,9 @@
 .POSIX:
 
-.PHONY: lint LookingGlass Catalyst IndexServer OCRServer load-test-data
+.PHONY: lint LookingGlass Catalyst IndexServer OCRServer load-test-data DocUpload
 
 lint:
+	ansible-playbook --syntax-check -c local DocUpload.yml
 	ansible-playbook --syntax-check -c local Catalyst.yml
 	ansible-playbook --syntax-check -c local LookingGlass.yml
 	ansible-playbook --syntax-check -c local load-test-data.yml
@@ -21,6 +22,9 @@ OCRServer:
 
 Catalyst:
 	ansible-playbook -v --ask-become-pass --forks 10 -c local Catalyst.yml
+
+DocUpload:
+	ansible-playbook -v --ask-become-pass --forks 10 -c local DocUpload.yml
 
 load-test-data:
 	ansible-playbook -v --ask-become-pass --forks 10 -c local load-test-data.yml

@@ -1,0 +1,7 @@
+---
+
+docupload_user: tt
+
+docmanager_url: 'http://127.0.0.1:3000'
+
+cwd: "{{ lookup('env', 'PWD') }}"

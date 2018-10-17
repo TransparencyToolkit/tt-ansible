@@ -1,0 +1,25 @@
+[Unit]
+Description=Transparency Toolkit DocUpload
+Requires=network.target
+After=syslog.target network.target
+[Service]
+Type=forking
+
+# Note that environment variables are sourced from
+# /etc/systemd/system/docupload.service.d/*.conf
+
+User={{ docupload_user }}
+
+WorkingDirectory={{ cwd }}/DocUpload/
+
+
+ExecStart=/bin/bash -lc 'rackup --env=development --pid=/run/docupload/docupload.pid --daemonize --port=9292'
+
+ExecStop=/bin/bash -lc 'rackup -e "exit 0"'
+
+RuntimeDirectory=docupload
+PIDFile=/run/docupload/docupload.pid
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=multi-user.target

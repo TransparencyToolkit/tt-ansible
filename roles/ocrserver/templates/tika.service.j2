@@ -3,7 +3,7 @@ Description=Transparency Toolkit IndexServer
 Requires=network.target
 After=syslog.target network.target
 [Service]
-Type=forking
+Type=simple
 
 # Note that environment variables are sourced from
 # /etc/systemd/system/tika.service.d/*.conf

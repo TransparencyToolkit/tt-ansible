@@ -60,6 +60,20 @@
 # gpg_signer
 # lookingglass_url in /etc/systemd/system/ocrserver.service.d/*.conf
 
+- name: Install Tika service
+  become: true
+  template:
+    src: tika.service.j2
+    dest: /usr/lib/systemd/system/tika.service
+    mode: ugo=r
+
+- name: Restart Tika systemd service
+  become: true
+  systemd:
+    state: restarted
+    daemon_reload: yes
+    name: tika
+
 - name: Install OCRServer service
   become: true
   template:

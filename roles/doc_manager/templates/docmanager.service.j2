@@ -11,7 +11,7 @@ Type=forking
 User={{ docmanager_user }}
 WorkingDirectory={{ cwd }}/DocManager/
 
-PIDFile=/run/tt.catalyst.pid
+PIDFile=/run/tt.docmanager.pid
 
 ExecStart=/bin/bash -lc 'rails server --environment=development --pid=/run/tt.docmanager.pid --daemon --port=3000'
 

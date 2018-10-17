@@ -1,6 +1,16 @@
 ---
 # install and configure the OCRServer component of Transparency Toolkit
 
+- name: Fetch OCRServer source code
+  register: ocrserver
+  async: 3600
+  poll: 10
+  git:
+    depth: 1
+    dest: OCRServer
+    repo: https://github.com/TransparencyToolkit/OCRServer
+    umask: "0077"
+
 - name: install dependencies
   apt:
     state: latest
@@ -73,6 +83,13 @@
     state: restarted
     daemon_reload: yes
     name: tika
+
+- name: Wait for git repos to sync
+  async_status:
+    jid: "{{ ocrserver.ansible_job_id }}"
+  retries: 600
+  delay: 5
+  until: ocrserver.finished
 
 - name: Install OCRServer service
   become: true

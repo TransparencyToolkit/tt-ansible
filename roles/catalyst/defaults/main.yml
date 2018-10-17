@@ -11,6 +11,7 @@ stanford_ner_version: 'stanford-ner-2018-02-27'
 
 catalyst_user: tt
 
+docmanager_url: http://127.0.0.1:3000/
 
 # TODO this is a hack to have somewhere to put this stuff
 cwd: "{{ lookup('env', 'PWD') }}"

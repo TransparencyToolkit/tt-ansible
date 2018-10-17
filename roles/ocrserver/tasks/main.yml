@@ -102,6 +102,20 @@
   become: true
   file: path=/etc/systemd/system/ocrserver.service.d/ state=directory
 
+- name: set environment variables in systemd conf
+  become: true
+  blockinfile:
+    create: yes
+    mode: ug=r,o=
+    dest: /etc/systemd/system/ocrserver.service.d/{{ item.name }}.conf
+    content: |
+      [Service]
+      Environment="{{item.name}}={{ item.value }}"
+  with_items:
+    - {name: 'indexserver_url', value: '{{ indexserver_url }}' }
+    - {name: 'gpg_signer', value: '{{ gpg_signer }}'}
+    - {name: 'gpg_recipient', value: '{{ gpg_recipient }}'}
+
 - name: Restart OCRServer systemd service
   become: true
   systemd:

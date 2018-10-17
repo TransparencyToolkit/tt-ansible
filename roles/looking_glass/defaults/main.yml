@@ -1,5 +1,11 @@
 ---
 
+project_index: archive_test
+
+catalyst_url: http://127.0.0.1:9004
+
+docmanager_url: http://127.0.0.1:3000
+
 lookingglass_user: tt
 
 cwd: "{{ lookup('env', 'PWD') }}"

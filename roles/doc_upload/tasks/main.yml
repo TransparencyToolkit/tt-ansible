@@ -33,7 +33,7 @@
     dest: /etc/systemd/system/docupload.service.d/{{ item.name }}.conf
     content: |
       [Service]
-      Environment="{{item.name}}='{{ item.value }}'"
+      Environment="{{item.name}}={{ item.value }}"
   with_items:
     - {name: 'ocrserver_url', value: '{{ocrserver_url}}' }
     - {name: 'gpg_signer', value: '{{gpg_signer}}' }

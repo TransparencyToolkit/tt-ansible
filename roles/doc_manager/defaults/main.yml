@@ -5,4 +5,6 @@ docmanager_user: tt
 postgres_db: transparency
 postgres_username: transparency
 
+catalyst_url: http://127.0.0.1:9004
+
 cwd: "{{ lookup('env', 'PWD') }}"

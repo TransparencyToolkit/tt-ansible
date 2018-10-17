@@ -5,7 +5,6 @@
   async: 3600
   poll: 2
   git:
-    force: yes # because this ghetto stuff modifies files inside the git repo
     depth: 1
     dest: DocManager
     repo: https://github.com/TransparencyToolkit/DocManager.git
@@ -131,15 +130,20 @@
   shell: "xxd -ps -l 20 /dev/urandom"
   register: docmanager_secret_key_base_fh
 
-- name: set SECRET_KEY_BASE systemd conf
+- name: set environment variables in systemd conf
   become: true
   blockinfile:
     create: yes
     mode: ug=r,o=
-    dest: /etc/systemd/system/docmanager.service.d/secret-key-base.conf
+    dest: /etc/systemd/system/docmanager.service.d/{{ item.name }}.conf
     content: |
       [Service]
-      Environment="SECRET_KEY_BASE='{{ docmanager_secret_key_base_fh.stdout }}'"
+      Environment="{{item.name}}={{ item.value }}"
+  with_items:
+    - {name: 'SECRET_KEY_BASE', value: '{{ docmanager_secret_key_base_fh.stdout }}' }
+    - {name: 'DOCMANAGER_URL', value: '{{ docmanager_url }}' }
+    - {name: 'CATALYST_URL', value: '{{ catalyst_url }}'}
+
 
 - name: Restart DocManager systemd service
   become: true

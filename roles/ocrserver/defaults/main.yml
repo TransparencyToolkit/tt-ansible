@@ -4,4 +4,10 @@ ocrserver_user: tt
 
 tika_version: '1.19.1'
 
+indexserver_url: http://127.0.0.1:9494
+
+gpg_signer: 12345678
+
+gpg_recipient: 98765432
+
 cwd: "{{ lookup('env', 'PWD') }}"

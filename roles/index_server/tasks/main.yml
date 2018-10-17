@@ -38,15 +38,17 @@
   become: true
   file: path=/etc/systemd/system/indexserver.service.d/ state=directory
 
-- name: set DOCMANAGER_URL systemd conf
+- name: set environment variables in systemd conf
   become: true
   blockinfile:
     create: yes
     mode: ug=r,o=
-    dest: /etc/systemd/system/indexserver.service.d/docmanager-url.conf
+    dest: /etc/systemd/system/indexserver.service.d/{{ item.name }}.conf
     content: |
       [Service]
-      Environment="DOCMANAGER_URL='{{ docmanager_url }}'"
+      Environment="{{item.name}}={{ item.value }}"
+  with_items:
+    - {name: 'DOCMANAGER_URL', value: '{{docmanager_url}}' }
 
 - name: Restart IndexServer systemd service
   become: true

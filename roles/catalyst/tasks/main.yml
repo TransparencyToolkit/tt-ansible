@@ -27,7 +27,6 @@
   async: 3600
   poll: 10
   git:
-    force: yes # TODO
     depth: 1
     dest: Catalyst
     repo: https://github.com/TransparencyToolkit/Catalyst.git
@@ -101,27 +100,22 @@
     dest: /usr/lib/systemd/system/catalyst.service
     mode: ugo=r
 
-# TODO may need to mkdir /etc/systemd/system/catalyst.service.d ?
+- name: Create catalyst.service.d directory
+  become: true
+  file: path=/etc/systemd/system/catalyst.service.d/ state=directory
 
-- name: Catalyst - set SECRET_KEY_BASE systemd conf
+- name: set environment variables in systemd conf
   become: true
   blockinfile:
     create: yes
     mode: ug=r,o=
-    dest: /etc/systemd/system/catalyst.service.d/secret-key-base.conf
+    dest: /etc/systemd/system/catalyst.service.d/{{ item.name }}.conf
     content: |
       [Service]
-      Environment="SECRET_KEY_BASE='{{ catalyst_secret_key_base_fh.stdout }}'"
-
-- name: Catalyst - set DOCMANAGER_URL systemd conf
-  become: true
-  blockinfile:
-    create: yes
-    mode: ug=r,o=
-    dest: /etc/systemd/system/catalyst.service.d/docmanager-url.conf
-    content: |
-      [Service]
-      Environment="DOCMANAGER_URL='{{ docmanager_url }}'"
+      Environment="{{item.name}}={{ item.value }}"
+  with_items:
+    - {name: 'SECRET_KEY_BASE', value: '{{ catalyst_secret_key_base_fh.stdout }}' }
+    - {name: 'DOCMANAGER_URL', value: '{{ docmanager_url }}' }
 
 - name: Restart Catalyst systemd service
   become: true

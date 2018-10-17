@@ -20,7 +20,6 @@
   async: 3600
   poll: 10
   git:
-    force: yes # TODO
     depth: 1
     dest: LookingGlass
     repo: https://github.com/TransparencyToolkit/LookingGlass.git
@@ -58,18 +57,31 @@
 - name: LG - bundle install
   command: chdir=LookingGlass bash -lc 'bundle install'
 
-- name: LG - change project index to nsadocs
-  lineinfile:
-    dest: LookingGlass/config/initializers/project_config.rb
-    regexp: 'ENV\\[''PROJECT_INDEX''\\] = "archive_test"' # TODO this doesn't work
-    line: "ENV['PROJECT_INDEX'] = 'nsadocs'"
-
 - name: Install LG service
   become: true
   template:
     src: lookingglass.service.j2
     dest: /usr/lib/systemd/system/lookingglass.service
     mode: ugo=r
+
+- name: generate SECRET_KEY_BASE
+  shell: "xxd -ps -l 20 /dev/urandom"
+  register: lg_secret_key_base_fh
+
+- name: set environment variables in systemd conf
+  become: true
+  blockinfile:
+    create: yes
+    mode: ug=r,o=
+    dest: /etc/systemd/system/lookingglass.service.d/{{ item.name }}.conf
+    content: |
+      [Service]
+      Environment="{{item.name}}={{ item.value }}"
+  with_items:
+    - {name: 'SECRET_KEY_BASE', value: '{{ lg_secret_key_base_fh.stdout }}' }
+    - {name: 'PROJECT_INDEX', value: '{{ project_index }}' }
+    - {name: 'DOCMANAGER_URL', value: '{{ docmanager_url }}' }
+    - {name: 'CATALYST_URL', value: '{{ catalyst_url }}'}
 
 
 - name: Stop LG systemd service

@@ -18,6 +18,7 @@
   async: 3600
   poll: 10
   git:
+    force: yes # TODO
     depth: 1
     dest: LookingGlass
     repo: https://github.com/TransparencyToolkit/LookingGlass.git
@@ -25,6 +26,7 @@
     recursive: no
     track_submodules: no
 
+# TODO split out to a load-test-data role
 - name: Fetch Test-Data repository
   register: testdata
   async: 3600
@@ -59,6 +61,21 @@
     regexp: 'ENV\\[''PROJECT_INDEX''\\] = "archive_test"' # TODO this doesn't work
     line: "ENV['PROJECT_INDEX'] = 'nsadocs'"
 
+- name: Install LG service
+  become: true
+  template:
+    src: lookingglass.service.j2
+    dest: /usr/lib/systemd/system/lookingglass.service
+    mode: ugo=r
+
+
+- name: Stop LG systemd service
+  become: true
+  systemd:
+    state: stopped
+    daemon_reload: yes
+    name: lookingglass
+
 - name: LG - Generate simple form data
   command: chdir=LookingGlass bash -lc 'rails generate simple_form:install --bootstrap'
   # TODO creates?
@@ -66,5 +83,6 @@
 - name: LG - precompile assets
   command: chdir=LookingGlass bash -lc 'rake assets:precompile'
 
-- name: Launch LookingGlass
-  command: chdir=LookingGlass bash -lc 'rails server --environment=development --daemon --port=3001'
+- name: Ensure LG service has started
+  become: true
+  service: name=lookingglass state=started enabled=yes

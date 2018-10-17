@@ -11,13 +11,14 @@ Type=forking
 User={{ catalyst_user }}
 WorkingDirectory={{ cwd }}/Catalyst/
 
-PIDFile=/run/tt.catalyst.pid
-
-ExecStart=/bin/bash -lc 'rails server --environment=development --pid=/run/tt.catalyst.pid --daemon --port=9004'
+ExecStart=/bin/bash -lc 'rails server --environment=development --pid=/run/catalyst/catalyst.pid --daemon --port=9004'
 
 ExecRestart=/bin/bash -lc 'rails restart'
 
 ExecStop=/bin/bash -lc 'rails -e "exit 0"'
+
+RuntimeDirectory=catalyst
+PIDFile=/run/catalyst/catalyst.pid
 
 [Install]
 WantedBy=multi-user.target

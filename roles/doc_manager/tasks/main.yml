@@ -10,6 +10,8 @@
     dest: DocManager
     repo: https://github.com/TransparencyToolkit/DocManager.git
     umask: "0077"
+    recursive: no
+    track_submodules: no
 
 # we include Elastic before installing deps since the ES role
 # forces an update to the apt cache.

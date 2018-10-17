@@ -36,7 +36,7 @@
   when: not tika.stat.exists
   command: # from 'bob' from https://people.apache.org/keys/group/tika.asc
     gpg --homedir '{{ tika_gpg_dir.path }}'
-        --recv-key '33303721259613C56B2860483F902C276ED9BE21'
+        --recv-key '833C1CC4926C1DDE29BB8731E4032DC4EF0CF38A'
 
 - name: fetch tika-server signature
   when: not tika.stat.exists

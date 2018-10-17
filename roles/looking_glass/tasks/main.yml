@@ -23,7 +23,7 @@
     depth: 1
     dest: LookingGlass
     repo: https://github.com/TransparencyToolkit/LookingGlass.git
-    version: editable_fields # aka git branch
+    version: editable # aka git branch
     umask: "0077"
     recursive: no
     track_submodules: no

@@ -64,6 +64,10 @@
     dest: /usr/lib/systemd/system/lookingglass.service
     mode: ugo=r
 
+- name: Creates lookingglass.service.d directory
+  become: true
+  file: path=/etc/systemd/system/lookingglass.service.d/ state=directory
+
 - name: generate SECRET_KEY_BASE
   shell: "xxd -ps -l 20 /dev/urandom"
   register: lg_secret_key_base_fh

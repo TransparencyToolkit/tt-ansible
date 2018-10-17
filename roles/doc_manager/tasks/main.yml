@@ -126,6 +126,11 @@
     dest: /usr/lib/systemd/system/docmanager.service
     mode: ugo=r
 
+- name: Creates docmanager.service.d directory
+  become: true
+  file: path=/etc/systemd/system/docmanager.service.d/ state=directory
+
+
 - name: generate SECRET_KEY_BASE
   shell: "xxd -ps -l 20 /dev/urandom"
   register: docmanager_secret_key_base_fh

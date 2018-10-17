@@ -101,6 +101,8 @@
     dest: /usr/lib/systemd/system/catalyst.service
     mode: ugo=r
 
+# TODO may need to mkdir /etc/systemd/system/catalyst.service.d ?
+
 - name: Catalyst - set SECRET_KEY_BASE systemd conf
   become: true
   blockinfile:

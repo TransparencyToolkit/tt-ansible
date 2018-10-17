@@ -11,13 +11,13 @@ Type=forking
 User={{ indexserver_user }}
 WorkingDirectory={{ cwd }}/IndexServer/
 
-PIDFile=/run/tt.indexserver.pid
+PIDFile=/run/indexserver/indexserver.pid
 
-ExecStart=/bin/bash -lc 'rails server --environment=development --pid=/run/tt.indexserver.pid --daemon --port=9494'
+ExecStart=/bin/bash -lc 'rackup --environment=development --pid=/run/indexserver/indexserver.pid --daemon --port=9494'
 
 ExecRestart=/bin/bash -lc 'rails restart'
 
-ExecStop=/bin/bash -lc 'rails -e "exit 0"'
+ExecStop=/bin/bash -lc 'rackup -e "exit 0"'
 
 [Install]
 WantedBy=multi-user.target

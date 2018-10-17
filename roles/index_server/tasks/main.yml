@@ -14,7 +14,6 @@
     umask: "0077"
 
 - name: Install required gems
-  become: true
   command: bash -lc 'gem install doc_integrity_check curb sinatra'
 
 - name: Wait for git repos to sync
@@ -28,5 +27,30 @@
 #       for DocManager
 # ENV["DOCMANAGER_URL"] = "http://localhost:3000"
 
-#- name: Bring it up
-#  command: chdir=IndexServer bash -lc 'rackup -p 9494'
+- name: Install IndexServer service
+  become: true
+  template:
+    src: indexserver.service.j2
+    dest: /usr/lib/systemd/system/indexserver.service
+    mode: ugo=r
+
+- name: set DOCMANAGER_URL systemd conf
+  become: true
+  blockinfile:
+    create: yes
+    mode: ug=r,o=
+    dest: /etc/systemd/system/indexserver.service.d/docmanager-url.conf
+    content: |
+      [Service]
+      Environment="DOCMANAGER_URL='{{ docmanager_url }}'"
+
+- name: Restart IndexServer systemd service
+  become: true
+  systemd:
+    state: restarted
+    daemon_reload: yes
+    name: indexserver
+
+- name: Ensure IndexServer service has started
+  become: true
+  service: name=indexserver state=started enabled=yes

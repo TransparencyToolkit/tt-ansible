@@ -19,6 +19,7 @@ ExecStop=/bin/bash -lc 'rails -e "exit 0"'
 
 RuntimeDirectory=catalyst
 PIDFile=/run/catalyst/catalyst.pid
+#NoNewPrivileges=
 
 [Install]
 WantedBy=multi-user.target

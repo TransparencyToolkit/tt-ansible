@@ -133,13 +133,13 @@
 
 - name: set SECRET_KEY_BASE systemd conf
   become: true
-  lineinfile:
+  blockinfile:
     create: yes
     mode: ug=r,o=
     dest: /etc/systemd/system/docmanager.service.d/secret-key-base.conf
-    regexp: '^SECRET_KEY_BASE='
-    line: "Environment=\"SECRET_KEY_BASE='{{ docmanager_secret_key_base_fh.stdout }}'\""
-    # TODO this is currently ignored due to not having a correct [Service] specification in the top
+    content: |
+      [Service]
+      Environment=\"SECRET_KEY_BASE='{{ docmanager_secret_key_base_fh.stdout }}'"
 
 - name: Restart DocManager systemd service
   become: true

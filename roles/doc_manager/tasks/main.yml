@@ -133,7 +133,6 @@
   become: true
   lineinfile:
     create: yes
-    present: yes
     mode: ug=r,o=
     dest: /etc/systemd/system/docmanager.service.d/secret-key-base.conf
     regexp: '^SECRET_KEY_BASE='

@@ -23,10 +23,6 @@
   delay: 60
   until: indexserver.finished
 
-# TODO: In config.ru, set the DOCMANAGER_URL environment variable to the url
-#       for DocManager
-# ENV["DOCMANAGER_URL"] = "http://localhost:3000"
-
 - name: Install IndexServer service
   become: true
   template:

@@ -63,12 +63,11 @@
         --verify 'tika-server-{{ tika_version }}.jar.asc'
         'tika-server-{{ tika_version }}.jar'
 
+- name: Include IndexServer dependency
+  include_role: name=index_server
+
 - name: install ruby gem dependencies
   command: bash -lc 'gem install doc_integrity_check mimemagic docsplit curb'
-
-# TODO Set the gpg_recipient key ID
-# gpg_signer
-# lookingglass_url in /etc/systemd/system/ocrserver.service.d/*.conf
 
 - name: Install Tika service
   become: true

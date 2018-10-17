@@ -9,14 +9,15 @@ Type=forking
 # /etc/systemd/system/indexserver.service.d/*.conf
 
 User={{ indexserver_user }}
+WorkingDirectory={{ cwd }}/IndexServer/
 
 PIDFile=/run/tt.indexserver.pid
 
-ExecStart=bash -lc 'cd {{cwd}}/IndexServer && rails server --environment=development --pid=/run/tt.indexserver.pid --daemon --port=9494'
+ExecStart=/bin/bash -lc 'rails server --environment=development --pid=/run/tt.indexserver.pid --daemon --port=9494'
 
-ExecRestart=bash -lc 'cd {{cwd}}/IndexServer && rails restart'
+ExecRestart=/bin/bash -lc 'rails restart'
 
-ExecStop=bash -lc 'cd {{cwd}}/IndexServer && rails -e "exit 0"'
+ExecStop=/bin/bash -lc 'rails -e "exit 0"'
 
 [Install]
 WantedBy=multi-user.target

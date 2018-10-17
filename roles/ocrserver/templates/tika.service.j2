@@ -9,13 +9,14 @@ Type=forking
 # /etc/systemd/system/tika.service.d/*.conf
 
 User={{ ocrserver_user }}
+WorkingDirectory={{ cwd }}
 
-PIDFile=/run/tt.ocrserver.pid
+#PIDFile=/run/tt.tika.pid
 
-ExecStart=bash -lc 'cd {{cwd}} && java -jar tika-server-1.18.jar'
+ExecStart=/bin/bash -lc 'java -jar tika-server-1.18.jar'
 # TODO look into `jsvc` here maybe
 
-ExecStop=bash -lc 'pkill -f "java -jar tika"'
+ExecStop=/bin/bash -lc 'pkill -f "java -jar tika"'
 
 [Install]
 WantedBy=multi-user.target

@@ -9,14 +9,15 @@ Type=forking
 # /etc/systemd/system/catalyst.service.d/*.conf
 
 User={{ catalyst_user }}
+WorkingDirectory={{ cwd }}/Catalyst/
 
 PIDFile=/run/tt.catalyst.pid
 
-ExecStart=bash -lc 'cd {{cwd}}/Catalyst && rails server --environment=development --pid=/run/tt.catalyst.pid --daemon --port=9004'
+ExecStart=/bin/bash -lc 'rails server --environment=development --pid=/run/tt.catalyst.pid --daemon --port=9004'
 
-ExecRestart=bash -lc 'cd {{cwd}}/Catalyst && rails restart'
+ExecRestart=/bin/bash -lc 'rails restart'
 
-ExecStop=bash -lc 'cd {{cwd}}/Catalyst && rails -e "exit 0"'
+ExecStop=/bin/bash -lc 'rails -e "exit 0"'
 
 [Install]
 WantedBy=multi-user.target

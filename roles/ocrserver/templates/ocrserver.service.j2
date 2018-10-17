@@ -9,15 +9,16 @@ Type=forking
 # /etc/systemd/system/ocrserver.service.d/*.conf
 
 User={{ ocrserver_user }}
+WorkingDirectory={{ cwd }/OCRServer
 
 PIDFile=/run/tt.ocrserver.pid
 
-ExecStart=bash -lc 'cd {{cwd}}/OCRServer && rackup config.ru  --env=development --pid=/run/tt.ocrserver.pid --daemonize --port=9393'
+ExecStart=/bin/bash -lc 'rackup config.ru  --env=development --pid=/run/tt.ocrserver.pid --daemonize --port=9393'
 
-#ExecRestart=bash -lc 'cd {{cwd}}/OCRServer && rackup restart'
+#ExecRestart=bash -lc 'rackup restart'
 # TODO does rackup have a prettier way to restart?
 
-ExecStop=bash -lc 'cd {{cwd}}/OCRServer && rackup config.ru -e "exit 0"'
+ExecStop=/bin/bash -lc 'rackup config.ru -e "exit 0"'
 
 [Install]
 WantedBy=multi-user.target

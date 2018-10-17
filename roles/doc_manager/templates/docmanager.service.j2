@@ -9,14 +9,15 @@ Type=forking
 # /etc/systemd/system/docmanager.service.d/*.conf
 
 User={{ docmanager_user }}
+WorkingDirectory={{ cwd }}/DocManager/
 
 PIDFile=/run/tt.catalyst.pid
 
-ExecStart=bash -lc 'cd {{cwd}}/DocManager && rails server --environment=development --pid=/run/tt.docmanager.pid --daemon --port=3000'
+ExecStart=/bin/bash -lc 'rails server --environment=development --pid=/run/tt.docmanager.pid --daemon --port=3000'
 
-ExecRestart=bash -lc 'cd {{cwd}}/DocManager && rails restart'
+ExecRestart=/bin/bash -lc 'rails restart'
 
-ExecStop=bash -lc 'cd {{cwd}}/DocManager && rails -e "exit 0"'
+ExecStop=/bin/bash -lc 'rails -e "exit 0"'
 
 [Install]
 WantedBy=multi-user.target

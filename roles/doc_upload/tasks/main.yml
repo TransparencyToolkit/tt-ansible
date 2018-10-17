@@ -12,7 +12,7 @@
 
 
 - name: Install gem dependencies
-  command: bash -lc 'gem install sinatra erb pry doc_integrity_check gpgme'
+  command: bash -lc 'gem install sinatra pry doc_integrity_check gpgme'
 
 - name: Install DocUpload service
   become: true

@@ -1,0 +1,22 @@
+[Unit]
+Description=Transparency Toolkit DocManager
+Requires=network.target
+After=syslog.target network.target
+[Service]
+Type=forking
+
+# Note that environment variables are sourced from
+# /etc/systemd/system/docmanager.service.d/*.conf
+
+User={{ docmanager_user }}
+
+PIDFile=/run/tt.catalyst.pid
+
+ExecStart=bash -lc 'cd {{cwd}}/DocManager && rails server --environment=development --pid=/run/tt.docmanager.pid --daemon --port=3000'
+
+ExecRestart=bash -lc 'cd {{cwd}}/DocManager && rails restart'
+
+ExecStop=bash -lc 'cd {{cwd}}/DocManager && rails -e "exit 0"'
+
+[Install]
+WantedBy=multi-user.target

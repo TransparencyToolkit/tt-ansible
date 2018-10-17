@@ -149,6 +149,3 @@
 - name: Ensure DocManager service has started
   become: true
   service: name=docmanager state=started enabled=yes
-
-- name: Load Test-Data
-  command: chdir=Test-Data/test_sets/sidtoday_test_set/ bash -lc 'ruby sidtoday_index_script.rb'

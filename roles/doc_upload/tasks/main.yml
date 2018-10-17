@@ -12,7 +12,6 @@
 
 
 - name: Install gem dependencies
-  become: true
   command: bash -lc 'gem install sinatra erb pry doc_integrity_check gpgme'
 
 - name: Install DocUpload service
@@ -26,16 +25,20 @@
   become: true
   file: path=/etc/systemd/system/docupload.service.d/ state=directory
 
-- name: set DOCMANAGER_URL systemd conf
+- name: set environment variables in systemd conf
   become: true
   blockinfile:
     create: yes
     mode: ug=r,o=
-    dest: /etc/systemd/system/docupload.service.d/docmanager-url.conf
+    dest: /etc/systemd/system/docupload.service.d/{{ item.name }}.conf
     content: |
       [Service]
-      Environment="DOCMANAGER_URL='{{ docmanager_url }}'"
-
+      Environment="{{item.name}}='{{ item.value }}'"
+  with_items:
+    - {name: 'ocrserver_url', value: ocrserver_url }
+    - {name: 'gpg_signer', value: gpg_signer }
+    - {name: 'gpg_recipient', value: gpg_recipient }
+    - {name: 'lookingglass_url', value: lookingglass_url }
 
 - name: Wait for git repos to sync
   async_status:

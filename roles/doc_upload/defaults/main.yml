@@ -2,6 +2,12 @@
 
 docupload_user: tt
 
-docmanager_url: 'http://127.0.0.1:3000'
+lookingglass_url: 'http://127.0.0.1:3001'
+
+ocrserver_url: 'http://127.0.0.1:9393'
+
+gpg_signer: 'ABCD1234'
+
+gpg_recipient: 'ABCD5678'
 
 cwd: "{{ lookup('env', 'PWD') }}"

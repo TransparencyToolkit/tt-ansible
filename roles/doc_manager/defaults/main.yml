@@ -1,4 +1,8 @@
 ---
 
+docmanager_user: tt
+
 postgres_db: transparency
 postgres_username: transparency
+
+cwd: "{{ lookup('env', 'PWD') }}"

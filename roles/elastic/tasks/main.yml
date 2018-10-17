@@ -14,6 +14,7 @@
 
 - name: Fetch ElasticSearch apt GPG key
   when: not elastic.stat.exists
+  retries: 10
   become: true # root needs to own everything here
   command: gpg --homedir '{{elastic_gpg_dir.path}}' \
     --recv-key '4609 5ACC 8548 582C 1A26 99A9 D27D 666C D88E 42B4'
@@ -32,6 +33,7 @@
 
 - name: Force-update package definitions to learn of the elasticsearch pkg
   become: true
+  retries: 3
   apt: install_recommends=no update_cache=yes cache_valid_time=0
 
 - name: Install ElasticSearch package

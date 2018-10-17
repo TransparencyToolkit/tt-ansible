@@ -53,6 +53,10 @@
     dest: /usr/lib/systemd/system/ocrserver.service
     mode: ugo=r
 
+- name: Creates ocrserver.service.d directory
+  become: true
+  file: path=/etc/systemd/system/ocrserver.service.d/ state=directory
+
 - name: Restart OCRServer systemd service
   become: true
   systemd:

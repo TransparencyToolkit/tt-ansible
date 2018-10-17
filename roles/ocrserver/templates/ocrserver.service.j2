@@ -11,14 +11,15 @@ Type=forking
 User={{ ocrserver_user }}
 WorkingDirectory={{ cwd }/OCRServer
 
-PIDFile=/run/tt.ocrserver.pid
+PIDFile=/run/ocrserver/ocrserver.pid
 
-ExecStart=/bin/bash -lc 'rackup config.ru  --env=development --pid=/run/tt.ocrserver.pid --daemonize --port=9393'
+ExecStart=/bin/bash -lc 'rackup config.ru  --env=development --pid=/run/ocrserver/ocrserver.pid --daemonize --port=9393'
 
 #ExecRestart=bash -lc 'rackup restart'
 # TODO does rackup have a prettier way to restart?
 
 ExecStop=/bin/bash -lc 'rackup config.ru -e "exit 0"'
+RuntimeDirectory=ocrserver
 
 [Install]
 WantedBy=multi-user.target

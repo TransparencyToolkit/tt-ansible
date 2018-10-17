@@ -34,7 +34,9 @@
     dest: /usr/lib/systemd/system/indexserver.service
     mode: ugo=r
 
-# sudo mkdir -p /etc/systemd/system/indexserver.service.d
+- name: Creates indexserver.service.d directory
+  become: true
+  file: path=/etc/systemd/system/indexserver.service.d/ state=directory
 
 - name: set DOCMANAGER_URL systemd conf
   become: true

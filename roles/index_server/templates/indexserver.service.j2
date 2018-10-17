@@ -9,15 +9,19 @@ Type=forking
 # /etc/systemd/system/indexserver.service.d/*.conf
 
 User={{ indexserver_user }}
+
 WorkingDirectory={{ cwd }}/IndexServer/
 
-PIDFile=/run/indexserver/indexserver.pid
 
 ExecStart=/bin/bash -lc 'rackup --env=development --pid=/run/indexserver/indexserver.pid --daemonize --port=9494'
 
 #ExecRestart=/bin/bash -lc 'rails restart'
 
 ExecStop=/bin/bash -lc 'rackup -e "exit 0"'
+
+RuntimeDirectory=indexserver
+PIDFile=/run/indexserver/indexserver.pid
+#NoNewPrivileges=yes
 
 [Install]
 WantedBy=multi-user.target

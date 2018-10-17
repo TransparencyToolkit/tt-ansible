@@ -114,7 +114,9 @@
   command: chdir=DocManager bash -lc 'bundle install'
 
 - name: DocManager - setup rake db stuff
-  shell: chdir=DocManager bash -lc 'rake db:create db:migrate'
+  shell: chdir=DocManager bash -lc 'rake db:create'
+- name: DocManager - setup rake db stuff
+  shell: chdir=DocManager bash -lc 'rake db:migrate'
 
 - name: Install DocManager service
   become: true

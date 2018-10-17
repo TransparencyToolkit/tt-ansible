@@ -21,7 +21,6 @@
       - default-jdk-headless # java for Stanford NER (TODO jdk needed?)
       - automake # bundle install cld
       - autoconf # bundle install cld
-      - aclocal  # bundle install cld
 
 - name: Fetch Catalyst source code
   register: catalyst

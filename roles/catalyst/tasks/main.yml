@@ -27,6 +27,7 @@
   async: 3600
   poll: 10
   git:
+    force: yes # TODO
     depth: 1
     dest: Catalyst
     repo: https://github.com/TransparencyToolkit/Catalyst.git
@@ -93,6 +94,13 @@
   shell: "xxd -ps -l 20 /dev/urandom"
   register: catalyst_secret_key_base_fh
 
+- name: Install Catalyst service
+  become: true
+  template:
+    src: catalyst.service.j2
+    dest: /usr/lib/systemd/system/catalyst.service
+    mode: ugo=r
+
 - name: Catalyst - set SECRET_KEY_BASE systemd conf
   become: true
   blockinfile:
@@ -112,13 +120,6 @@
     content: |
       [Service]
       Environment="DOCMANAGER_URL='{{ docmanager_url }}'"
-
-- name: Install Catalyst service
-  become: true
-  template:
-    src: catalyst.service.j2
-    dest: /usr/lib/systemd/system/catalyst.service
-    mode: ugo=r
 
 - name: Restart Catalyst systemd service
   become: true

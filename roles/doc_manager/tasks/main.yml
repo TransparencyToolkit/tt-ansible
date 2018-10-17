@@ -1,8 +1,9 @@
 ---
+
 - name: Fetch DocManager source code
   register: docmanager
   async: 3600
-  poll: 10
+  poll: 2
   git:
     force: yes # because this ghetto stuff modifies files inside the git repo
     depth: 1
@@ -10,11 +11,21 @@
     repo: https://github.com/TransparencyToolkit/DocManager.git
     umask: "0077"
 
+# we include Elastic before installing deps since the ES role
+# forces an update to the apt cache.
+# Calling ES first enables us to skip the optional update in the
+# apt role below.
+- name: Include ElasticSearch role
+  include_role: name=elastic allow_duplicates=False
+  # TODO make this async?
+
 - name: Install our dependencies from apt
   become: true
   apt:
     state: latest
     install_recommends: no
+    cache_valid_time: 7200
+    update_cache: yes
     name:
       - postgresql # database used by DocManager for metadata
       - postgresql-client # for pq/postgres gem
@@ -26,25 +37,12 @@
       - curl # for: rbenv?
       - libcurl4-openssl-dev # undeclared/missing dependency for curb gem
 
-- name: Include ElasticSearch role
-  include_role: name=elastic allow_duplicates=False
-
 - name: Include ruby role
   include_role: name=our_ruby allow_duplicates=False
 
 - name: Ensure PostgreSQL service has started
   become: true
   service: name=postgresql state=started enabled=yes
-
-- name: DocManager - generate SECRET_KEY_BASE
-  shell: "xxd -ps -l 20 /dev/urandom"
-  register: secret_key_base_fh
-
-- name: "DocManager - set SECRET_KEY_BASE for production"
-  lineinfile:
-    dest: DocManager/config/secrets.yml
-    regexp: '  secret_key_base: <%= ENV\\["SECRET_KEY_BASE"\\] %>'
-    line: "  secret_key_base: '{{ secret_key_base_fh.stdout }}'"
 
 - name: DocManager - generate random postgres password
   shell: "xxd -ps -l 16 /dev/urandom"
@@ -118,8 +116,37 @@
 - name: DocManager - setup rake db stuff
   shell: chdir=DocManager bash -lc 'rake db:create db:migrate'
 
-- name: Launch DocManager
-  command: chdir=DocManager bash -lc 'bundle exec puma --environment production --port 3000 & sleep 10'
+- name: Install DocManager service
+  become: true
+  template:
+    src: docmanager.service.j2
+    dest: /usr/lib/systemd/system/docmanager.service
+    mode: ugo=r
+
+- name: generate SECRET_KEY_BASE
+  shell: "xxd -ps -l 20 /dev/urandom"
+  register: docmanager_secret_key_base_fh
+
+- name: set SECRET_KEY_BASE systemd conf
+  become: true
+  lineinfile:
+    create: yes
+    present: yes
+    mode: ug=r,o=
+    dest: /etc/systemd/system/docmanager.service.d/secret-key-base.conf
+    regexp: '^SECRET_KEY_BASE='
+    line: "SECRET_KEY_BASE='{{ docmanager_secret_key_base_fh.stdout }}'"
+
+- name: Restart DocManager systemd service
+  become: true
+  systemd:
+    state: restarted
+    daemon_reload: yes
+    name: docmanager
+
+- name: Ensure DocManager service has started
+  become: true
+  service: name=docmanager state=started enabled=yes
 
 - name: Load Test-Data
   command: chdir=Test-Data/test_sets/sidtoday_test_set/ bash -lc 'ruby sidtoday_index_script.rb'

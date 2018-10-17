@@ -1,0 +1,7 @@
+---
+
+- name: OCRServer installation
+  hosts: localhost
+  gather_facts: no
+  roles:
+    - ocrserver

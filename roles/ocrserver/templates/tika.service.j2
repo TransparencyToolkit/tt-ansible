@@ -1,0 +1,21 @@
+[Unit]
+Description=Transparency Toolkit IndexServer
+Requires=network.target
+After=syslog.target network.target
+[Service]
+Type=forking
+
+# Note that environment variables are sourced from
+# /etc/systemd/system/tika.service.d/*.conf
+
+User={{ ocrserver_user }}
+
+PIDFile=/run/tt.ocrserver.pid
+
+ExecStart=bash -lc 'cd {{cwd}} && java -jar tika-server-1.18.jar'
+# TODO look into `jsvc` here maybe
+
+ExecStop=bash -lc 'pkill -f "java -jar tika"'
+
+[Install]
+WantedBy=multi-user.target

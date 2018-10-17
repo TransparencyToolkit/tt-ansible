@@ -1,0 +1,7 @@
+---
+
+- name: IndexServer installation
+  hosts: localhost
+  gather_facts: no
+  roles:
+    - index_server

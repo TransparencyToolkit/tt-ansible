@@ -12,14 +12,14 @@
       - tesseract
       - pdftk
       - openjdk-8-jre
-      - openjdk-8-jdk
+      #- openjdk-8-jdk
       - libreoffice
       - libcurl3
       - libcurl3-gnutls
       - libcurl4-openssl-dev
 
 - name: make sure we have ruby
-  include_role: our_ruby
+  include_role: name=our_ruby
 
 - name: fetch tika-server keys
   command: # from 'bob' from https://people.apache.org/keys/group/tika.asc
@@ -42,9 +42,22 @@
 - name: install ruby gem dependencies
   command: bash -lc 'gem install doc_integrity_check mimemagic docsplit curb'
 
-# TODO Set the gpg_recipient key ID and lookingglass_url in the config.ru file
+# TODO Set the gpg_recipient key ID
+# gpg_signer
+# lookingglass_url in /etc/systemd/system/ocrserver.service.d/*.conf
 
-- name: rackup
-  command: bash -lc 'rackup config.ru'
+- name: Install OCRServer service
+  become: true
+  template:
+    src: ocrserver.service.j2
+    dest: /usr/lib/systemd/system/ocrserver.service
+    mode: ugo=r
+
+- name: Restart OCRServer systemd service
+  become: true
+  systemd:
+    state: restarted
+    daemon_reload: yes
+    name: ocrserver
 
 # TODO see OCRServer README for details on how to test

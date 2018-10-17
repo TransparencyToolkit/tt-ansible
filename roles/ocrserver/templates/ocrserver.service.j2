@@ -1,0 +1,23 @@
+[Unit]
+Description=Transparency Toolkit IndexServer
+Requires=network.target docmanager.service indexserver.service tika.service
+After=syslog.target network.target docmanager.service indexserver.service tika.service
+[Service]
+Type=forking
+
+# Note that environment variables are sourced from
+# /etc/systemd/system/ocrserver.service.d/*.conf
+
+User={{ ocrserver_user }}
+
+PIDFile=/run/tt.ocrserver.pid
+
+ExecStart=bash -lc 'cd {{cwd}}/OCRServer && rackup config.ru  --env=development --pid=/run/tt.ocrserver.pid --daemonize --port=9393'
+
+#ExecRestart=bash -lc 'cd {{cwd}}/OCRServer && rackup restart'
+# TODO does rackup have a prettier way to restart?
+
+ExecStop=bash -lc 'cd {{cwd}}/OCRServer && rackup config.ru -e "exit 0"'
+
+[Install]
+WantedBy=multi-user.target

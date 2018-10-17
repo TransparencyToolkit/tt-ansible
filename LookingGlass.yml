@@ -1,7 +1,7 @@
 ---
 # usage: ansible-playbook -v --ask-become-pass -c local LookingGlass.yml
 
-- name: LookingGlass installation (with test data)
+- name: LookingGlass installation
   hosts: localhost
   gather_facts: no
   roles:

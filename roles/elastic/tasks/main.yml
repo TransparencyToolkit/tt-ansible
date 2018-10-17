@@ -39,6 +39,8 @@
   apt:
     state: latest
     install_recommends: no
+    cache_valid_time: 7200
+    update_cache: yes
     name:
       - default-jre-headless # java for elasticsearch
       - elasticsearch

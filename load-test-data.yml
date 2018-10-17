@@ -1,0 +1,8 @@
+---
+
+  - name: Load test data
+    hosts: localhost
+    gather_facts: no
+    tasks:
+      - name: Load DocManager sidtoday test data
+        command: chdir=Test-Data/test_sets/sidtoday_test_set/ bash -lc 'ruby sidtoday_index_script.rb'

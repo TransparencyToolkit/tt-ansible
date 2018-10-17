@@ -1,0 +1,22 @@
+[Unit]
+Description=Transparency Toolkit IndexServer
+Requires=network.target docmanager.service
+After=syslog.target network.target docmanager.service
+[Service]
+Type=forking
+
+# Note that environment variables are sourced from
+# /etc/systemd/system/indexserver.service.d/*.conf
+
+User={{ indexserver_user }}
+
+PIDFile=/run/tt.indexserver.pid
+
+ExecStart=bash -lc 'cd {{cwd}}/IndexServer && rails server --environment=development --pid=/run/tt.indexserver.pid --daemon --port=9494'
+
+ExecRestart=bash -lc 'cd {{cwd}}/IndexServer && rails restart'
+
+ExecStop=bash -lc 'cd {{cwd}}/IndexServer && rails -e "exit 0"'
+
+[Install]
+WantedBy=multi-user.target

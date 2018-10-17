@@ -1,0 +1,4 @@
+---
+
+indexserver_user: tt
+cwd: "{{ lookup('env', 'PWD') }}"

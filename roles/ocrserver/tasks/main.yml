@@ -5,11 +5,13 @@
   apt:
     state: latest
     install_recommends: no
+    cache_valid_time: 7200
+    update_cache: yes
     name:
       - graphicsmagick
       - poppler-data
       - ghostscript
-      - tesseract
+      - tesseract-ocr
       - pdftk
       - openjdk-8-jre
       #- openjdk-8-jdk
@@ -21,23 +23,36 @@
 - name: make sure we have ruby
   include_role: name=our_ruby
 
+- name: Check if we need to fetch Tika
+  stat: path=tika-server-{{ tika_version }}.jar.asc
+  register: elastic
+
+- name: Create temporary directory for Tika GPG key
+  when: not tika.stat.exists
+  become: true # root needs to own everything here
+  tempfile: state=directory suffix=.tika.gpg
+  register: tika_gpg_dir # tika_gpg_dir.path
+
 - name: fetch tika-server keys
+  when: not tika.stat.exists
   command: # from 'bob' from https://people.apache.org/keys/group/tika.asc
     gpg --homedir '{{tika_gpg_dir}}'
         --recv-key '33303721259613C56B2860483F902C276ED9BE21'
 
 - name: fetch tika-server signature
+  when: not tika.stat.exists
   command:
-    curl 'http://www.apache.org/dist/tika/tika-server-1.17.jar.asc'
-         -o tika-server-1.17.jar.asc
+    curl 'http://www.apache.org/dist/tika/tika-server-{{ tika_version }}.jar.asc'
+         -o tika-server-{{ tika_version }}.jar.asc
 
 - name: fetch tika-server jar file
+  when: not tika.stat.exists
   command:
     curl 'http://www.apache.org/dist/tika/tika-server-1.17.jar'
-         -o tika-server-1.17.jar
+         -o tika-server-{{ tika_version }}.jar
 
 - name: verify tika-server signature
-  command: gpg --verify tika-server-1.17.jar tika-server-1.17.jar.asc
+  command: gpg --verify tika-server-{{ tika_version }}.jar tika-server-{{ tika_version }}.jar.asc
 
 - name: install ruby gem dependencies
   command: bash -lc 'gem install doc_integrity_check mimemagic docsplit curb'

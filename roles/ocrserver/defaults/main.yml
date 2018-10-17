@@ -1,4 +1,7 @@
 ---
 
 ocrserver_user: tt
+
+tika_version: '1.17'
+
 cwd: "{{ lookup('env', 'PWD') }}"

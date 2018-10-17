@@ -95,23 +95,23 @@
 
 - name: Catalyst - set SECRET_KEY_BASE systemd conf
   become: true
-  lineinfile:
+  blockinfile:
     create: yes
-    present: yes
     mode: ug=r,o=
     dest: /etc/systemd/system/catalyst.service.d/secret-key-base.conf
-    regexp: '^SECRET_KEY_BASE='
-    line: "SECRET_KEY_BASE='{{ catalyst_secret_key_base_fh.stdout }}'"
+    content: |
+      [Service]
+      Environment="SECRET_KEY_BASE='{{ catalyst_secret_key_base_fh.stdout }}'"
 
 - name: Catalyst - set DOCMANAGER_URL systemd conf
   become: true
-  lineinfile:
+  blockinfile:
     create: yes
-    present: yes
     mode: ug=r,o=
     dest: /etc/systemd/system/catalyst.service.d/docmanager-url.conf
-    regexp: '^DOCMANAGER_URL='
-    line: "DOCMANAGER_URL='{{ docmanager_url }}'"
+    content: |
+      [Service]
+      Environment="DOCMANAGER_URL='{{ docmanager_url }}'"
 
 - name: Install Catalyst service
   become: true

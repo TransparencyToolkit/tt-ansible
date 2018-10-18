@@ -3,7 +3,7 @@ Description=Transparency Toolkit IndexServer
 Requires=network.target docmanager.service
 After=syslog.target network.target docmanager.service
 [Service]
-Type=forking
+Type=simple
 
 # Note that environment variables are sourced from
 # /etc/systemd/system/indexserver.service.d/*.conf
@@ -13,7 +13,7 @@ User={{ indexserver_user }}
 WorkingDirectory={{ cwd }}/IndexServer/
 
 
-ExecStart=/bin/bash -lc 'rackup --env=development --pid=/run/indexserver/indexserver.pid --daemonize --port=9494'
+ExecStart=/bin/bash -lc 'rackup --env=development --pid=/run/indexserver/indexserver.pid --port=9494'
 
 #ExecRestart=/bin/bash -lc 'rails restart'
 

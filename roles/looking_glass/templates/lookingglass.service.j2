@@ -3,7 +3,7 @@ Description=Transparency Toolkit LookingGlass
 Requires=network.target docmanager.service
 After=syslog.target network.target docmanager.service
 [Service]
-Type=forking
+Type=simple
 
 # Note that environment variables are sourced from
 # /etc/systemd/system/docmanager.service.d/*.conf
@@ -13,7 +13,7 @@ User={{ lookingglass_user }}
 WorkingDirectory={{ cwd }}/DocManager/
 
 
-ExecStart=/bin/bash -lc 'rails server --environment=development --pid=/run/lookingglass/lookingglass.pid --daemon --port=3001'
+ExecStart=/bin/bash -lc 'rails server --environment=development --pid=/run/lookingglass/lookingglass.pid --port=3001'
 
 ExecRestart=/bin/bash -lc 'rails restart'
 

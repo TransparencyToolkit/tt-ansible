@@ -3,7 +3,7 @@ Description=Transparency Toolkit DocManager
 Requires=network.target
 After=syslog.target network.target
 [Service]
-Type=forking
+Type=simple
 
 # Note that environment variables are sourced from
 # /etc/systemd/system/docmanager.service.d/*.conf
@@ -13,7 +13,7 @@ User={{ docmanager_user }}
 WorkingDirectory={{ cwd }}/DocManager/
 
 
-ExecStart=/bin/bash -lc 'rails server --environment=development --pid=/run/docmanager/docmanager.pid --daemon --port=3000'
+ExecStart=/bin/bash -lc 'rails server --environment=development --pid=/run/docmanager/docmanager.pid --port=3000'
 
 ExecRestart=/bin/bash -lc 'rails restart'
 

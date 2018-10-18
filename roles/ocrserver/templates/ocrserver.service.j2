@@ -3,7 +3,7 @@ Description=Transparency Toolkit OCRServer
 Requires=network.target docmanager.service indexserver.service tika.service
 After=syslog.target network.target docmanager.service indexserver.service tika.service
 [Service]
-Type=forking
+Type=simple
 
 # Note that environment variables are sourced from
 # /etc/systemd/system/ocrserver.service.d/*.conf
@@ -13,7 +13,7 @@ WorkingDirectory={{ cwd }}/OCRServer
 
 PIDFile=/run/ocrserver/ocrserver.pid
 
-ExecStart=/bin/bash -lc 'rackup config.ru  --env=development --pid=/run/ocrserver/ocrserver.pid --daemonize --port=9393'
+ExecStart=/bin/bash -lc 'rackup config.ru  --env=development --pid=/run/ocrserver/ocrserver.pid --port=9393'
 
 #ExecRestart=bash -lc 'rackup restart'
 # TODO does rackup have a prettier way to restart?

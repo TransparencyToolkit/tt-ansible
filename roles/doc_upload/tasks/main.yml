@@ -56,4 +56,4 @@
 
 - name: Ensure DocUpload service has started
   become: true
-  service: name=docupload state=started enabled=yes
+  service: name=docupload state=restarted enabled=yes

@@ -10,10 +10,10 @@ Type=simple
 
 User={{ lookingglass_user }}
 
-WorkingDirectory={{ cwd }}/DocManager/
+WorkingDirectory={{ cwd }}/LookingGlass/
 
 
-ExecStart=/bin/bash -lc 'rails server --environment=development --pid=/run/lookingglass/lookingglass.pid --port=3001'
+ExecStart=/bin/bash -lc 'rails server --environment=development --pid=/run/lookingglass/lookingglass.pid --host 10.13.37.2 --port=3001'
 
 ExecRestart=/bin/bash -lc 'rails restart'
 

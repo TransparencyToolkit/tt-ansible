@@ -2,8 +2,13 @@
 
 project_index: archive_test
 
+# The public-facing URL for DocUpload:
+docupload_url: http://127.0.0.1:9292
+
+# The internal URL for Catalyst:
 catalyst_url: http://127.0.0.1:9004
 
+# The internal URL for DocManager:
 docmanager_url: http://127.0.0.1:3000
 
 lookingglass_user: tt

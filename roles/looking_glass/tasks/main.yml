@@ -86,6 +86,7 @@
     - {name: 'PROJECT_INDEX', value: '{{ project_index }}' }
     - {name: 'DOCMANAGER_URL', value: '{{ docmanager_url }}' }
     - {name: 'CATALYST_URL', value: '{{ catalyst_url }}'}
+    - {name: 'DOCUPLOAD_URL', value: '{{ docupload_url }}'}
 
 
 - name: Stop LG systemd service

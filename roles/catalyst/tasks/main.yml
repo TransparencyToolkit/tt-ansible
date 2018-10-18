@@ -83,7 +83,7 @@
 
 - name: Ensure Stanford-NER service has started
   become: true
-  service: name=stanford-nr state=started enabled=yes
+  service: name=stanford-ner state=started enabled=yes
 
 
 - name: Catalyst - Install DocManager role

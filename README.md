@@ -43,4 +43,5 @@ Environment="gpg_signer='my-real-keygrip-here'"
   - . /etc/profile.d/rvm.sh
 - ansible-git:  `verify_commit` / `refspec` to pin our code
 - get rid of gpg-agent and dirmngr for the temporary imports
+- generate css for lookingglass, `./themes -b`
 

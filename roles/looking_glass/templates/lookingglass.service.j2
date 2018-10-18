@@ -11,16 +11,14 @@ Type=simple
 User={{ lookingglass_user }}
 
 WorkingDirectory={{ cwd }}/LookingGlass/
-
-
-ExecStart=/bin/bash -lc 'rails server --environment=development --pid=/run/lookingglass/lookingglass.pid --host 10.13.37.2 --port=3001'
-
-ExecRestart=/bin/bash -lc 'rails restart'
-
-ExecStop=/bin/bash -lc 'rails -e "exit 0"'
-
 RuntimeDirectory=lookingglass
 PIDFile=/run/lookingglass/lookingglass.pid
+
+ExecStart=/bin/bash -lc 'rails server --environment=development --pid=/run/lookingglass/lookingglass.pid --binding=10.13.37.2 --port=3001'
+
+#ExecRestart=/bin/bash -lc 'rails restart'
+
+ExecStop=/bin/bash -lc 'rails -e "exit 0"'
 
 [Install]
 WantedBy=multi-user.target

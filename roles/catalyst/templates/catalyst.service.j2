@@ -11,9 +11,7 @@ Type=simple
 User={{ catalyst_user }}
 WorkingDirectory={{ cwd }}/Catalyst/
 
-ExecStart=/bin/bash -lc 'rails server --environment=development --pid=/run/catalyst/catalyst.pid --port=9004'
-
-ExecRestart=/bin/bash -lc 'rails restart'
+ExecStart=/bin/bash -lc 'rails server --environment=development --pid=/run/catalyst/catalyst.pid --binding=127.0.0.1 --port=9004'
 
 ExecStop=/bin/bash -lc 'rails -e "exit 0"'
 

@@ -1,0 +1,20 @@
+[Unit]
+Description=Transparency Toolkit Stanfor NER
+Requires=network.target
+After=syslog.target network.target
+[Service]
+Type=simple
+
+# Note that environment variables are sourced from
+# /etc/systemd/system/stanford-ner.service.d/*.conf
+
+User={{ catalyst_user }}
+WorkingDirectory="{{ cwd }}/stanford-ner-{{ stanford_ner_version}}"
+
+ExecStart=/bin/bash -lc 'java -mx1000m -cp stanford-ner.jar:lib/* edu.stanford.nlp.ie.NERServer -loadClassifier classifiers/english.all.3class.distsim.crf.ser.gz -port 9002 -outputFormat inlineXML'
+# TODO look into `jsvc` here maybe
+
+ExecStop=/bin/bash -lc 'pkill -f "-cp stanford-ner.jar:/"'
+
+[Install]
+WantedBy=multi-user.target

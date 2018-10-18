@@ -12,6 +12,7 @@
     umask: "0077"
 
 - name: install dependencies
+  become: true
   apt:
     state: latest
     install_recommends: no

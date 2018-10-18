@@ -63,7 +63,28 @@
     mode: u=rx
     src: "{{ stanford_ner_version }}.zip"
 
-#TODO make service: cd stanford-ner-2018-02-7/ && java -mx1000m -cp stanford-ner.jar:lib/* edu.stanford.nlp.ie.NERServer -loadClassifier classifiers/english.all.3class.distsim.crf.ser.gz -port 9002 -outputFormat inlineXML
+- name: Install Stanford NER service
+  become: true
+  template:
+    src: stanford-ner.service.j2
+    dest: /usr/lib/systemd/system/stanford-ner.service
+    mode: ugo=r
+
+- name: Create stanford-ner.service.d directory
+  become: true
+  file: path=/etc/systemd/system/stanford-ner.service.d/ state=directory
+
+- name: Restart Stanford-NER systemd service
+  become: true
+  systemd:
+    state: restarted
+    daemon_reload: yes
+    name: stanford-ner
+
+- name: Ensure Stanford-NER service has started
+  become: true
+  service: name=stanford-nr state=started enabled=yes
+
 
 - name: Catalyst - Install DocManager role
   include_role: name=doc_manager allow_duplicates=False

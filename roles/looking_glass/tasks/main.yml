@@ -14,6 +14,7 @@
       - tmux
       - libmagic-dev # required by ruby-filemagic
       - apt-transport-https # for: elasticsearch
+      - ruby-sass # for compiling themes
 
 - name: Fetch LookingGlass source code
   register: lookingglass
@@ -55,6 +56,7 @@
   #        until: docmanager.finished and lookingglass.finished and testdata.finished
 
 - name: LG - bundle install
+  become: yes
   command: chdir=LookingGlass bash -lc 'bundle install'
 
 - name: Install LG service
@@ -102,6 +104,9 @@
 
 - name: LG - precompile assets
   command: chdir=LookingGlass bash -lc 'rake assets:precompile'
+
+- name: LG - compile themes
+  command: chdir=LookingGlass bash -lc './themes.sh -b'
 
 - name: Ensure LG service has started
   become: true

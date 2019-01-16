@@ -68,6 +68,7 @@
   include_role: name=index_server
 
 - name: install ruby gem dependencies
+  become: true
   command: bash -lc 'gem install doc_integrity_check mimemagic docsplit curb'
 
 - name: Install Tika service

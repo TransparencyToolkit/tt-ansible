@@ -12,6 +12,7 @@
 
 
 - name: Install gem dependencies
+  become: true
   command: bash -lc 'gem install sinatra pry doc_integrity_check gpgme'
 
 - name: Install DocUpload service
@@ -20,6 +21,13 @@
     src: docupload.service.j2
     dest: /usr/lib/systemd/system/docupload.service
     mode: ugo=r
+
+- name: Creates docupload incoming directory
+  become: true
+  file: path="{{ docupload_tmp }}/" state=directory
+    owner="{{ docupload_user }}"
+    mode=u=rwx,go=
+
 
 - name: Creates docupload.service.d directory
   become: true
@@ -39,6 +47,7 @@
     - {name: 'gpg_signer', value: '{{gpg_signer}}' }
     - {name: 'gpg_recipient', value: '{{gpg_recipient}}' }
     - {name: 'lookingglass_url', value: '{{lookingglass_url}}' }
+    - {name: 'docupload_tmpdir', value: '{{docupload_tmpdir}}'}
 
 - name: Wait for git repos to sync
   async_status:

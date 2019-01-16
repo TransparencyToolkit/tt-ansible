@@ -113,6 +113,7 @@
     mode: "0600"
 
 - name: DocManager - bundle install
+  become: true
   command: chdir=DocManager bash -lc 'bundle install'
 
 - name: DocManager - setup rake db stuff

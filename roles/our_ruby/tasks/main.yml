@@ -40,14 +40,14 @@
   when: not rvm.stat.exists
   get_url:
     url: https://raw.githubusercontent.com/rvm/rvm/master/binscripts/rvm-installer
-    dest: rvm-installer
+    dest: '{{ cwd }}/rvm-installer'
     mode: u=rx
 
 - name: Fetch rvm.io install script SIGNATURE
   when: not rvm.stat.exists
   get_url:
     url: https://raw.githubusercontent.com/rvm/rvm/master/binscripts/rvm-installer.asc
-    dest: rvm-installer.asc
+    dest: '{{ cwd }}/rvm-installer.asc'
     mode: u=rx
 
 - name: Verify rvm.io install script SIGNATURE
@@ -55,20 +55,31 @@
   command: gpg --homedir '{{ rvm_gpg_dir.path }}' --batch \
                --verify rvm-installer.asc rvm-installer
 
-# TODO should probably run this as root (with become: true), and then figure out how to make rvm install itself into the user's profile instead)
 - name: Install rvm
   when: not rvm.stat.exists
+  become: true
   command: bash rvm-installer
 
 - name: install target ruby version
-  command: rvm install {{ ruby_version }}
+  become: true
+  command: bash -lc 'rvm install --disable-install-doc {{ ruby_version }}'
 
-- name: enable target ruby version
-  command: rvm alias create default {{ ruby_version }}
+
+- name: adding current user to RVM backdoor group
+  become: true
+  user:
+    name: "{{ ansible_user }}"
+    append: yes
+    groups: rvm
+
+- name: enable target ruby version by default
+  become: true
+  command: bash -lc 'rvm alias create default {{ ruby_version }}'
 
 - name: ensure target ruby version is being used
   command: bash -lc "ruby -v | grep
     '^ruby {{ ruby_version.replace('.','\.') }}'"
 
 - name: install bundler
+  become: true
   command: bash -lc 'gem install bundler'

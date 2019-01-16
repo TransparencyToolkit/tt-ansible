@@ -9,7 +9,9 @@ Type=simple
 # /etc/systemd/system/stanford-ner.service.d/*.conf
 
 User={{ catalyst_user }}
-WorkingDirectory="{{ cwd }}/stanford-ner-{{ stanford_ner_version}}"
+WorkingDirectory="{{ cwd }}/{{ stanford_ner_version}}"
+RuntimeDirectory=stanford-ner
+PIDFile=/run/stanford-ner/stanford-ner.pid
 
 ExecStart=/bin/bash -lc 'java -mx1000m -cp stanford-ner.jar:lib/* edu.stanford.nlp.ie.NERServer -loadClassifier classifiers/english.all.3class.distsim.crf.ser.gz -port 9002 -outputFormat inlineXML'
 # TODO look into `jsvc` here maybe

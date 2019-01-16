@@ -1,12 +1,12 @@
 [Unit]
 Description=Transparency Toolkit LookingGlass
-Requires=network.target docmanager.service
-After=syslog.target network.target docmanager.service
+Requires=network.target
+After=syslog.target network.target
 [Service]
 Type=simple
 
 # Note that environment variables are sourced from
-# /etc/systemd/system/docmanager.service.d/*.conf
+# /etc/systemd/system/lookingglass.service.d/*.conf
 
 User={{ lookingglass_user }}
 

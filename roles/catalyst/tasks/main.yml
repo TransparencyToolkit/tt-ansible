@@ -57,7 +57,7 @@
 - name: Catalyst - unzip Stanford NER
   unarchive:
     copy: no
-    creates: "{{ cwd }}/{{ stanford_ner_version }}/"
+    creates: "{{ cwd }}/{{ stanford_ner_version }}/stanford-ner.jar"
     decrypt: no
     dest: "{{ cwd }}/{{ stanford_ner_version }}/"
     mode: u=rx
@@ -98,9 +98,11 @@
   #        until: docmanager.finished and lookingglass.finished and testdata.finished
 
 - name: Catalyst - gem install cld working around obv wrong C code
+  become: true
   command: bash -lc 'CXXFLAGS=-Wno-narrowing gem install cld -v 0.7.0'
 
 - name: Catalyst - bundle install
+  become: true
   command: chdir=Catalyst bash -lc 'bundle install'
 
 - name: Catalyst - rake db:setup

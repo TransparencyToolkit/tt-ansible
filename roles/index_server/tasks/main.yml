@@ -14,6 +14,7 @@
     umask: "0077"
 
 - name: Install required gems
+  become: true
   command: bash -lc 'gem install doc_integrity_check curb sinatra'
 
 - name: Wait for git repos to sync

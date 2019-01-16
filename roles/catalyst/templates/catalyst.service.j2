@@ -1,7 +1,7 @@
 [Unit]
 Description=Transparency Toolkit Catalyst
-Requires=network.target docmanager.service stanford-ner.service
-After=syslog.target network.target docmanager.service stanford-ner.service
+Requires=network.target stanford-ner.service
+After=syslog.target network.target stanford-ner.service
 [Service]
 Type=simple
 

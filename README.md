@@ -5,15 +5,21 @@
 ## LookingGlass on Debian
 
 ```shell
-apt-get update \
-  && apt-get install -y -q --no-install-recommends ansible python-apt \
+apt update \
+  && apt install -y -q --no-install-recommends ansible python-apt \
   && make lint \
   && make LookingGlass
 ```
 
 Check that everything is up to date:
 ```shell
+make lint
 ansible-playbook --check -v --ask-become-pass -c local LookingGlass.yml
+```
+
+Installing LookingGlass:
+```
+make LookingGlass
 ```
 
 ## Environment variable overrides
@@ -29,6 +35,8 @@ Environment="gpg_signer='12345678'"
 Environment="gpg_signer='my-real-keygrip-here'"
 ```
 
+Another variable you might want to overwrite is `docupload_tmpdir` which controls the location of the temporary files that DocUpload generates.
+
 ## TODO NOTES
 - provision postgres users with lower privs
 - http://docs.ansible.com/ansible/latest/index.html
@@ -43,5 +51,3 @@ Environment="gpg_signer='my-real-keygrip-here'"
   - . /etc/profile.d/rvm.sh
 - ansible-git:  `verify_commit` / `refspec` to pin our code
 - get rid of gpg-agent and dirmngr for the temporary imports
-- generate css for lookingglass, `./themes -b`
-

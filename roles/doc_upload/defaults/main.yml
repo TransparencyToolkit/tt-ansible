@@ -11,3 +11,5 @@ gpg_signer: 'ABCD1234'
 gpg_recipient: 'ABCD5678'
 
 cwd: "{{ lookup('env', 'PWD') }}"
+
+docupload_tmpdir: '{{ cwd }}/DOCUPLOAD_INCOMING'

@@ -24,7 +24,7 @@
 
 - name: Creates docupload incoming directory
   become: true
-  file: path="{{ docupload_tmp }}/" state=directory
+  file: path="{{ docupload_tmpdir }}/" state=directory
     owner="{{ docupload_user }}"
     mode=0700 # u=rwx,go=
 

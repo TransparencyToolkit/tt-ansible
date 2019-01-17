@@ -75,7 +75,7 @@
   become: true
   template:
     src: tika.service.j2
-    dest: /usr/lib/systemd/system/tika.service
+    dest: /lib/systemd/system/tika.service
     mode: ugo=r
 
 - name: Restart Tika systemd service
@@ -96,7 +96,7 @@
   become: true
   template:
     src: ocrserver.service.j2
-    dest: /usr/lib/systemd/system/ocrserver.service
+    dest: /lib/systemd/system/ocrserver.service
     mode: ugo=r
 
 - name: Creates ocrserver.service.d directory

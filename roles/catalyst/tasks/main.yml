@@ -58,7 +58,6 @@
   unarchive:
     copy: no
     creates: "{{ cwd }}/{{ stanford_ner_version }}/stanford-ner.jar"
-    decrypt: no
     dest: "{{ cwd }}/{{ stanford_ner_version }}/"
     mode: u=rx
     src: "{{ stanford_ner_version }}.zip"
@@ -67,7 +66,7 @@
   become: true
   template:
     src: stanford-ner.service.j2
-    dest: /usr/lib/systemd/system/stanford-ner.service
+    dest: /lib/systemd/system/stanford-ner.service
     mode: ugo=r
 
 - name: Create stanford-ner.service.d directory
@@ -120,7 +119,7 @@
   become: true
   template:
     src: catalyst.service.j2
-    dest: /usr/lib/systemd/system/catalyst.service
+    dest: /lib/systemd/system/catalyst.service
     mode: ugo=r
 
 - name: Create catalyst.service.d directory

@@ -19,7 +19,7 @@
   become: true
   template:
     src: docupload.service.j2
-    dest: /usr/lib/systemd/system/docupload.service
+    dest: /lib/systemd/system/docupload.service
     mode: ugo=r
 
 - name: Creates docupload incoming directory

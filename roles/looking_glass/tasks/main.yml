@@ -63,7 +63,7 @@
   become: true
   template:
     src: lookingglass.service.j2
-    dest: /usr/lib/systemd/system/lookingglass.service
+    dest: /lib/systemd/system/lookingglass.service
     mode: ugo=r
 
 - name: Creates lookingglass.service.d directory

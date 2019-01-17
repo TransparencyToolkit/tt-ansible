@@ -28,7 +28,7 @@
   become: true
   template:
     src: indexserver.service.j2
-    dest: /usr/lib/systemd/system/indexserver.service
+    dest: /lib/systemd/system/indexserver.service
     mode: ugo=r
 
 - name: Creates indexserver.service.d directory

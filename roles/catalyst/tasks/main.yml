@@ -40,7 +40,7 @@
   poll: 10
   get_url:
     checksum: sha256:e37b0094040c95e98799d849a7be2f4967de6b786f0b07360d179756bd4dce95
-    mode: u=r
+    mode: 0400 # u=r,go=
     timeout: 25
     dest: "{{ cwd }}/{{ stanford_ner_version }}.zip"
     url: "https://nlp.stanford.edu/software/{{ stanford_ner_version }}.zip"
@@ -57,9 +57,9 @@
 - name: Catalyst - unzip Stanford NER
   unarchive:
     copy: no
-    creates: "{{ cwd }}/{{ stanford_ner_version }}/stanford-ner.jar"
-    dest: "{{ cwd }}/{{ stanford_ner_version }}/"
-    mode: u=rx
+    creates: "{{ cwd }}/{{ stanford_ner_version }}/{{ stanford_ner_version }}/stanford-ner.jar"
+    dest: "{{ cwd }}/{{ stanford_ner_version }}"
+    mode: 0500 # u=rx
     src: "{{ stanford_ner_version }}.zip"
 
 - name: Install Stanford NER service
@@ -67,7 +67,7 @@
   template:
     src: stanford-ner.service.j2
     dest: /lib/systemd/system/stanford-ner.service
-    mode: ugo=r
+    mode: 0444 # ugo=r
 
 - name: Create stanford-ner.service.d directory
   become: true
@@ -120,7 +120,7 @@
   template:
     src: catalyst.service.j2
     dest: /lib/systemd/system/catalyst.service
-    mode: ugo=r
+    mode: 0444 # ugo=r
 
 - name: Create catalyst.service.d directory
   become: true
@@ -130,7 +130,7 @@
   become: true
   blockinfile:
     create: yes
-    mode: ug=r,o=
+    mode: 0440 # ug=r,o=
     dest: /etc/systemd/system/catalyst.service.d/{{ item.name }}.conf
     content: |
       [Service]

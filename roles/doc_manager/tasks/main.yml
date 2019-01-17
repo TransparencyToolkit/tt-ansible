@@ -110,7 +110,7 @@
   template:
     src: database.yml.j2
     dest: DocManager/config/database.yml
-    mode: "0600"
+    mode: 0600 # u=rw,go=
 
 - name: DocManager - bundle install
   become: true
@@ -126,7 +126,7 @@
   template:
     src: docmanager.service.j2
     dest: /lib/systemd/system/docmanager.service
-    mode: ugo=r
+    mode: 0444 # ugo=r
 
 - name: Creates docmanager.service.d directory
   become: true
@@ -141,7 +141,7 @@
   become: true
   blockinfile:
     create: yes
-    mode: ug=r,o=
+    mode: 0440 # ug=r,o=
     dest: /etc/systemd/system/docmanager.service.d/{{ item.name }}.conf
     content: |
       [Service]

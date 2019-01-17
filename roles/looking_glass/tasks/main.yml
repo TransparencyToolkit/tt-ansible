@@ -64,7 +64,7 @@
   template:
     src: lookingglass.service.j2
     dest: /lib/systemd/system/lookingglass.service
-    mode: ugo=r
+    mode: 0444 #ugo=r
 
 - name: Creates lookingglass.service.d directory
   become: true
@@ -78,7 +78,7 @@
   become: true
   blockinfile:
     create: yes
-    mode: ug=r,o=
+    mode: 0440 # ug=r,o=
     dest: /etc/systemd/system/lookingglass.service.d/{{ item.name }}.conf
     content: |
       [Service]

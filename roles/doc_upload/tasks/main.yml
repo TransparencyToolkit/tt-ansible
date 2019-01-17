@@ -20,13 +20,13 @@
   template:
     src: docupload.service.j2
     dest: /lib/systemd/system/docupload.service
-    mode: ugo=r
+    mode: 0444 # ugo=r
 
 - name: Creates docupload incoming directory
   become: true
   file: path="{{ docupload_tmp }}/" state=directory
     owner="{{ docupload_user }}"
-    mode=u=rwx,go=
+    mode=0700 # u=rwx,go=
 
 
 - name: Creates docupload.service.d directory
@@ -37,7 +37,7 @@
   become: true
   blockinfile:
     create: yes
-    mode: ug=r,o=
+    mode: 0440 #ug=r,o=
     dest: /etc/systemd/system/docupload.service.d/{{ item.name }}.conf
     content: |
       [Service]

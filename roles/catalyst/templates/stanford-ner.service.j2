@@ -9,7 +9,7 @@ Type=simple
 # /etc/systemd/system/stanford-ner.service.d/*.conf
 
 User={{ catalyst_user }}
-WorkingDirectory="{{ cwd }}/{{ stanford_ner_version}}"
+WorkingDirectory={{ cwd }}/{{ stanford_ner_version }}/{{ stanford_ner_version }}
 RuntimeDirectory=stanford-ner
 PIDFile=/run/stanford-ner/stanford-ner.pid
 

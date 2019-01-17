@@ -41,14 +41,14 @@
   get_url:
     url: https://raw.githubusercontent.com/rvm/rvm/master/binscripts/rvm-installer
     dest: '{{ cwd }}/rvm-installer'
-    mode: u=rx
+    mode: 0500 #u=rx
 
 - name: Fetch rvm.io install script SIGNATURE
   when: not rvm.stat.exists
   get_url:
     url: https://raw.githubusercontent.com/rvm/rvm/master/binscripts/rvm-installer.asc
     dest: '{{ cwd }}/rvm-installer.asc'
-    mode: u=rx
+    mode: 0500 # u=rx
 
 - name: Verify rvm.io install script SIGNATURE
   when: not rvm.stat.exists

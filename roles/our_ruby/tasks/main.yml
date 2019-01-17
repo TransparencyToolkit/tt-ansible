@@ -13,7 +13,7 @@
       - sudo
       - libcurl4-openssl-dev # undeclared/missing dependency for curb gem
 - name: Check if we need to download RVM
-  stat: path=~/.rvm/bin/rvm
+  stat: path=/usr/local/rvm/bin/rvm
   register: rvm
 
 - name: Create temporary directory for rvm PGP keys

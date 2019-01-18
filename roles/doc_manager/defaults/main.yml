@@ -1,10 +1,13 @@
 ---
 
-docmanager_user: tt
+# TODO describe these
+docmanager_user: "{{ lookup('env', 'USER') }}"
 
 postgres_db: transparency
 postgres_username: transparency
 
 catalyst_url: http://127.0.0.1:9004
+
+docmanager_ip: '127.0.0.1'
 
 cwd: "{{ lookup('env', 'PWD') }}"

@@ -13,7 +13,7 @@ User={{ indexserver_user }}
 WorkingDirectory={{ cwd }}/IndexServer/
 
 
-ExecStart=/bin/bash -lc 'rackup --env=development --pid=/run/indexserver/indexserver.pid --port=9494'
+ExecStart=/bin/bash -lc 'rackup --env=development --pid=/run/indexserver/indexserver.pid --host="{{indexserver_ip}}" --port=9494'
 
 #ExecRestart=/bin/bash -lc 'rails restart'
 

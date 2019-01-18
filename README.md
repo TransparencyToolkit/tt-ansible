@@ -52,7 +52,61 @@ ansible-playbook -v --ask-become-pass --forks 10 -c local DocUpload.yml \
   --extra-vars "{
     'ocrserver_url': 'http://127.1.2.3:9393',
     'lookingglass_url': 'https://demo.transparency.tools/',
+    'gpg_recipient': 'TODO',
+    'gpg_signer': 'TODO',
   }"
+```
+
+Additional configuration options:
+```python
+# The user under which to run the DocUpload service:
+# (defaults to installing user)
+docupload_user
+
+# Directory into which data will be written before it is
+# sent upstream to the OCRServer:
+docupload_tmpdir
+
+# The IP or hostname the DocUpload service will bind to
+# (listen on, on port 9292):
+docupload_ip: '127.0.0.1'
+```
+
+## Installing IndexServer
+
+```bash
+ansible-playbook -v --ask-become-pass --forks 10 -c local IndexServer.yml \
+  --extra-vars "{
+    'docmanager_url': 'http://127.1.2.3:3000',
+  }"
+```
+
+Additional configuration options:
+```python
+# The user under which to run the DocUpload service:
+# (defaults to installing user)
+indexserver_user
+
+docmanager_url
+```
+
+## Installing DocManager
+
+```bash
+ansible-playbook -v --ask-become-pass --forks 10 -c local DocManager.yml \
+  --extra-vars "{
+    'catalyst_url': 'http://127.0.0.1:9004',
+  }"
+```
+
+Additional configuration options:
+```python
+docmanager_user: tt
+
+postgres_db: transparency
+postgres_username: transparency
+
+catalyst_url: http://127.0.0.1:9004
 ```
 
 ## SystemD services

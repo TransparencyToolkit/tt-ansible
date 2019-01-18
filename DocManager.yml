@@ -1,0 +1,8 @@
+---
+# usage: ansible-playbook -v --ask-become-pass -c local DocManager.yml
+
+- name: DocManager installation
+  hosts: localhost
+  gather_facts: no
+  roles:
+    - doc_manager

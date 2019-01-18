@@ -1,7 +1,11 @@
 ---
 
-indexserver_user: tt
+# The user under which to run the DocUpload service:
+# (defaults to installing user)
+indexserver_user: "{{ lookup('env', 'USER') }}"
 
 docmanager_url: 'http://127.0.0.1:3000'
+
+indexserver_ip: '127.0.0.1'
 
 cwd: "{{ lookup('env', 'PWD') }}"

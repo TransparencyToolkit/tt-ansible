@@ -13,14 +13,6 @@
     recursive: no
     track_submodules: no
 
-# we include Elastic before installing deps since the ES role
-# forces an update to the apt cache.
-# Calling ES first enables us to skip the optional update in the
-# apt role below.
-- name: Include ElasticSearch role
-  include_role: name=elastic allow_duplicates=False
-  # TODO make this async?
-
 - name: Install our dependencies from apt
   become: true
   apt:
@@ -38,9 +30,6 @@
       - apt-transport-https # for: elasticsearch
       - curl # for: rbenv?
       - libcurl4-openssl-dev # undeclared/missing dependency for curb gem
-
-- name: Include ruby role
-  include_role: name=our_ruby allow_duplicates=False
 
 - name: Ensure PostgreSQL service has started
   become: true

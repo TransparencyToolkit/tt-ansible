@@ -40,12 +40,6 @@
     repo: https://github.com/TransparencyToolkit/Test-Data.git
     umask: "0077"
 
-- name: Install DocManager role
-  include_role: name=doc_manager allow_duplicates=False
-
-- name: Include ruby role
-  include_role: name=our_ruby allow_duplicates=False
-
 - name: Ensure postgresql service has started
   become: true
   service: name=postgresql state=started enabled=yes

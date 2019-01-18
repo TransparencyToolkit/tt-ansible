@@ -13,9 +13,9 @@ User={{ docmanager_user }}
 WorkingDirectory={{ cwd }}/DocManager/
 
 
-ExecStart=/bin/bash -lc 'rails server --environment=development --pid=/run/docmanager/docmanager.pid --port=3000'
+ExecStart=/bin/bash -lc 'rails server --environment=development --pid=/run/docmanager/docmanager.pid --binding "{{docmanager_ip}}" --port=3000'
 
-ExecRestart=/bin/bash -lc 'rails restart'
+ExecReload=/bin/bash -lc 'rails restart'
 
 ExecStop=/bin/bash -lc 'rails -e "exit 0"'
 

@@ -9,11 +9,15 @@ TODO pipeline diagram
 DocUpload -> OCRServer -> IndexServer -> DocManager -> Catalyst -> LookingGlass w/ever
 
 **Ports used**
-|------------------|
-| Port | Service   |
-|------|-----------|
-| 9393 | DocUpload |
-|------|-----------|
+|--------------------|
+| Port | Service     |
+|------|-------------|
+| 3000 | DocManager  |
+| 9004 | Catalyst    |
+| 9292 | DocUpload   |
+| 9393 | OCRServer   |
+| 9494 | IndexServer |
+|------|-------------|
 
 
 ## Prerequisites

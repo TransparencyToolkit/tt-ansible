@@ -12,18 +12,26 @@
       - curl
       - sudo
       - libcurl4-openssl-dev # undeclared/missing dependency for curb gem
-- name: Check if we need to download RVM
+
+- name: Check if we need to download RVM (/usr/local)
   stat: path=/usr/local/rvm/bin/rvm
-  register: rvm
+  register: rvm_bin
+
+- name: Check if we need to download RVM (/etc/profile)
+  stat: path=/etc/profile.d/rvm.sh
+  register: rvm_profile
+
+- set_fact:
+    install_rvm="{{ not (rvm_bin.stat.exists and rvm_profile.stat.exists) }}"
 
 - name: Create temporary directory for rvm PGP keys
-  when: not rvm.stat.exists
+  when: install_rvm
   tempfile: state=directory suffix=.rvm.gpg
   register: rvm_gpg_dir # rvm_gpg_dir.path
   # umask: "0077" TODO ?
 
 - name: Fetch rvm.io PGP keys
-  when: not rvm.stat.exists
+  when: install_rvm
   command: gpg --homedir '{{rvm_gpg_dir.path}}' \
     --keyserver hkps://hkps.pool.sks-keyservers.net \
     --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 \
@@ -31,32 +39,32 @@
   # TODO should pin CA?
 
 - name: Make GPG -trust- the keys.
-  when: not rvm.stat.exists
+  when: install_rvm
   command: echo "7D2BAF1CF37B13E2069D6956105BD0E739499BDB:5:\n\
                  409B6B1796C275462A1703113804BB82D39DC0E3:5:" \
            | gpg --homedir '{{ rvm_gpg_dir.path }}' --batch --import-ownertrust
 
 - name: Fetch rvm.io install script
-  when: not rvm.stat.exists
+  when: install_rvm
   get_url:
     url: https://raw.githubusercontent.com/rvm/rvm/master/binscripts/rvm-installer
     dest: '{{ cwd }}/rvm-installer'
     mode: 0500 #u=rx
 
 - name: Fetch rvm.io install script SIGNATURE
-  when: not rvm.stat.exists
+  when: install_rvm
   get_url:
     url: https://raw.githubusercontent.com/rvm/rvm/master/binscripts/rvm-installer.asc
     dest: '{{ cwd }}/rvm-installer.asc'
     mode: 0500 # u=rx
 
 - name: Verify rvm.io install script SIGNATURE
-  when: not rvm.stat.exists
+  when: install_rvm
   command: gpg --homedir '{{ rvm_gpg_dir.path }}' --batch \
                --verify rvm-installer.asc rvm-installer
 
 - name: Install rvm
-  when: not rvm.stat.exists
+  when: install_rvm
   become: true
   command: bash rvm-installer
 

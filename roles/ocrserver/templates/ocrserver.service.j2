@@ -1,7 +1,10 @@
 [Unit]
 Description=Transparency Toolkit OCRServer
+Documentation=https://github.com/TransparencyToolkit/OCRServer
+
 Requires=network.target tika.service
-After=syslog.target network.target docmanager.service indexserver.service tika.service
+After=syslog.target network.target tika.service
+
 [Service]
 Type=simple
 

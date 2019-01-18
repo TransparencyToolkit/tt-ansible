@@ -2,29 +2,71 @@
 
 # THIS IS PROBABLY NOT WORKING CORRECTLY
 
-## LookingGlass on Debian
+These recipes are being tested on Debian-`stable` and Debian-`testing`.
 
+TODO pipeline diagram
+
+DocUpload -> OCRServer -> IndexServer -> DocManager -> Catalyst -> LookingGlass w/ever
+
+**Ports used**
+|------------------|
+| Port | Service   |
+|------|-----------|
+| 9393 | DocUpload |
+|------|-----------|
+
+
+## Prerequisites
+
+This repository contains a number of Ansible recipes to help deploy the Transparency Toolkit tools on servers.
+
+The `.yml` files in the top directory (`Catalyst.yml`, `DocUpload.yml`, ...) are so-called "Ansible Playbooks."
+
+To use our playbooks you must have the [Ansible](https://ansible.com/)
+deployment tools installed, the `sudo` utility, and the Python bindings to
+[libapt-pkg bindings](https://pypi.org/project/python-apt/).
+These can be installed with the following commands:
 ```shell
-apt update \
-  && apt install -y -q --no-install-recommends ansible python-apt \
-  && make lint \
-  && make LookingGlass
+sudo apt update \
+  && sudo apt install -y -q --no-install-recommends \
+       ansible python-apt sudo
 ```
 
-Check that everything is up to date:
-```shell
-make lint
-ansible-playbook --check -v --ask-become-pass -c local LookingGlass.yml
+Each of the playbooks has a number of configuration options that you can
+specify using the `--extra-vars` argument, which takes a JSON dictionary.
+
+We will be documenting the configuration options for each playbook below, but
+you can also manually consult the options for each role in
+the `roles/*/defaults/main.yml` files.
+
+**NB:** Since the pipeline is encrypted using [GPG](https://gnupg.org/), you must configure `gpg_recipient` and `gpg_signer` for most of the playbooks.
+
+## Installing DocUpload
+
+```bash
+ansible-playbook -v --ask-become-pass --forks 10 -c local DocUpload.yml \
+  --extra-vars "{
+    'ocrserver_url': 'http://127.1.2.3:9393',
+    'lookingglass_url': 'https://demo.transparency.tools/',
+  }"
 ```
 
-Installing LookingGlass:
-```
-make LookingGlass
-```
+## SystemD services
 
-## Environment variable overrides
+Our services are installed as systemd services.
+Quick cheatsheet for managing systemd services:
+|------------------------------------------------------------|
+| View status           | `sudo systemctl status docupload`  |
+| Restart               | `sudo systemctl restart docupload` |
+| View logs             | `sudo journalctl -u docupload`     |
+| Live view (tail) logs | `sudo journalctl -fu docupload`    |
+|------------------------------------------------------------|
 
-You can override a variety of default settings by appending to files in `/etc/systemd/MY.SERVICE.service.d/*`, or by creating new files in those directories.
+
+### Environment variable overrides
+
+You can override a variety of default settings **ON AN ALREADY INSTALLED SYSTEM** by appending to files in `/etc/systemd/MY.SERVICE.service.d/*`, or by creating new files in those directories.
+TODO
 To override the default, append your line **after** `# END ANSIBLE MANAGED BLOCK`. The ansible scripts will update those sections with the upstream defaults, so custom changes have to be below those.
 Example: `/etc/systemd/system/docupload.service.d/gpg_signer.conf`:
 ```systemd
@@ -40,7 +82,6 @@ Another variable you might want to overwrite is `docupload_tmpdir` which control
 ## TODO NOTES
 - provision postgres users with lower privs
 - http://docs.ansible.com/ansible/latest/index.html
-- ansible-playbook -e `EXTRA_VARS`
 - --no-install-recommends
 - authentication?
   - [ansible playbook lookups](http://docs.ansible.com/ansible/latest/playbooks_lookups.html#examples)

@@ -8,14 +8,14 @@
     depth: 1
     dest: DocUpload
     repo: https://github.com/TransparencyToolkit/DocUpload
-    umask: 0077 # go=
+    umask: "0077" # go= // must be quoted for some reason.
     recursive: no
     track_submodules: no
 
 
 - name: Install gem dependencies
   become: true
-  command: bash -lc 'gem install sinatra pry doc_integrity_check gpgme'
+  command: bash -lc 'gem install sinatra pry doc_integrity_check gpgme curb'
 
 - name: Install DocUpload service
   become: true

@@ -1,15 +1,31 @@
 ---
 
-docupload_user: tt
+# The IP or hostname the DocUpload service will bind to
+# (listen on, on port 9292):
+docupload_ip: '127.0.0.1'
 
+# The URL for your LookingGlass instance.
+# This will be used to redirect the user once
+# their upload has completed:
 lookingglass_url: 'http://127.0.0.1:3001'
 
+# The internal URL for the OCRServer which we will be
+# sending the uploaded documents to:
 ocrserver_url: 'http://127.0.0.1:9393'
 
-gpg_signer: 'ABCD1234'
-
+# The GPG fingerprint of the OCRServer instance:
 gpg_recipient: 'ABCD5678'
 
+# The user under which to run the DocUpload service:
+docupload_user: "{{ lookup('env', 'USER') }}"
+
+
+# The GPG key used by DocUpload to sign its emissions:
+# gpg_signer: 'ABCD1234'
+
+# Generally should not need to override this:
 cwd: "{{ lookup('env', 'PWD') }}"
 
+# Directory into which data will be written before it is
+# sent upstream to the OCRServer:
 docupload_tmpdir: '{{ cwd }}/DOCUPLOAD_INCOMING'

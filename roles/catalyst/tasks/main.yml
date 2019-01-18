@@ -14,11 +14,12 @@
       - libsqlite3-dev
       - libidn11-dev
       - hunspell
-      - libcurl3
-      - libcurl3-gnutls
+      # on debian libcurl4 now conflicts libcurl3:
+      #- libcurl3
+      #- libcurl3-gnutls
       - libcurl4-openssl-dev
       - default-jre-headless # java for Stanford NER
-      - default-jdk-headless # java for Stanford NER (TODO jdk needed?)
+      #- default-jdk-headless # java for Stanford NER (TODO jdk needed?)
       - automake # bundle install cld
       - autoconf # bundle install cld
 
@@ -83,13 +84,6 @@
 - name: Ensure Stanford-NER service has started
   become: true
   service: name=stanford-ner state=started enabled=yes
-
-
-- name: Catalyst - Install DocManager role
-  include_role: name=doc_manager allow_duplicates=False
-
-- name: Catalyst - Include ruby role
-  include_role: name=our_ruby allow_duplicates=False
 
   #      - name: Wait for git repositories to sync
   #        retries: 60

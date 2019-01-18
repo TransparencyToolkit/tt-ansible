@@ -25,14 +25,11 @@
       - tesseract-ocr
       - pdftk
       - openjdk-8-jre
-      #- openjdk-8-jdk
       - libreoffice
-      - libcurl3
-      - libcurl3-gnutls
+      #- openjdk-8-jdk
+      #- libcurl3
+      #- libcurl3-gnutls
       - libcurl4-openssl-dev
-
-- name: make sure we have ruby
-  include_role: name=our_ruby
 
 - name: Check if we need to fetch Tika
   stat: path=tika-server-{{ tika_version }}.jar.asc

@@ -9,16 +9,17 @@ TODO pipeline diagram
 DocUpload -> OCRServer -> IndexServer -> DocManager -> Catalyst -> LookingGlass w/ever
 
 **Ports used**
-|--------------------|
-| Port | Service     |
-|------|-------------|
-| 3000 | DocManager  |
-| 9004 | Catalyst    |
-| 9292 | DocUpload   |
-| 9393 | OCRServer   |
-| 9494 | IndexServer |
-|------|-------------|
 
+| Port | Service      | Description |
+| ---- | ------------ | --- |
+| 3000 | DocManager   | Document storage |
+| 3001 | LookingGlass | Frontend |
+| 9002 | Stanford-NER | |
+| 9004 | Catalyst     | |
+| 9292 | DocUpload    | Small interface for uploading files. |
+| 9393 | OCRServer    | |
+| 9494 | IndexServer  | |
+| 9998 | Tika         | Component of OCRServer. |
 
 ## Prerequisites
 
@@ -95,37 +96,69 @@ docmanager_url
 ```bash
 ansible-playbook -v --ask-become-pass --forks 10 -c local DocManager.yml \
   --extra-vars "{
-    'catalyst_url': 'http://127.0.0.1:9004',
+    'docmanager_url': 'http://127.0.0.1:3000',
   }"
 ```
 
 Additional configuration options:
 ```python
-docmanager_user: tt
+docmanager_user
+docmanager_ip
 
-postgres_db: transparency
-postgres_username: transparency
+postgres_db
+postgres_username
 
-catalyst_url: http://127.0.0.1:9004
+catalyst_url
 ```
+
+
+## Installing OCRServer
+
+```bash
+ansible-playbook -v --ask-become-pass --forks 10 -c local OCRServer.yml \
+  --extra-vars "{
+    'gpg_recipient': '98765432',
+  }"
+```
+
+Additional configuration options:
+```python
+ocrserver_user
+
+tika_version: '1.19.1'
+
+indexserver_url: http://127.0.0.1:9494
+
+gpg_signer
+gpg_recipient
+```
+
+
 
 ## SystemD services
 
 Our services are installed as systemd services.
 Quick cheatsheet for managing systemd services:
-|------------------------------------------------------------|
+
+| Action to perform     | Shell command                      |
+| --------------------- | ---------------------------------- |
 | View status           | `sudo systemctl status docupload`  |
 | Restart               | `sudo systemctl restart docupload` |
 | View logs             | `sudo journalctl -u docupload`     |
 | Live view (tail) logs | `sudo journalctl -fu docupload`    |
-|------------------------------------------------------------|
 
 
 ### Environment variable overrides
 
-You can override a variety of default settings **ON AN ALREADY INSTALLED SYSTEM** by appending to files in `/etc/systemd/MY.SERVICE.service.d/*`, or by creating new files in those directories.
-TODO
-To override the default, append your line **after** `# END ANSIBLE MANAGED BLOCK`. The ansible scripts will update those sections with the upstream defaults, so custom changes have to be below those.
+You can override the default configuration options after installation
+by appending to files in `/etc/systemd/MY.SERVICE.service.d/*`,
+or by creating new files in those directories.
+
+To override the default, append your line **after**
+`# END ANSIBLE MANAGED BLOCK`.
+The ansible scripts will update those sections with the
+ upstream defaults, so custom changes have to be below those.
+
 Example: `/etc/systemd/system/docupload.service.d/gpg_signer.conf`:
 ```systemd
 # BEGIN ANSIBLE MANAGED BLOCK
@@ -134,8 +167,6 @@ Environment="gpg_signer='12345678'"
 # END ANSIBLE MANAGED BLOCK
 Environment="gpg_signer='my-real-keygrip-here'"
 ```
-
-Another variable you might want to overwrite is `docupload_tmpdir` which controls the location of the temporary files that DocUpload generates.
 
 ## TODO NOTES
 - provision postgres users with lower privs
@@ -146,7 +177,6 @@ Another variable you might want to overwrite is `docupload_tmpdir` which control
   - elasticsearch authentication?
 - rvm
   - https://rvm.io/rvm/install
-  - add user to rvm group
   - . /etc/profile.d/rvm.sh
 - ansible-git:  `verify_commit` / `refspec` to pin our code
 - get rid of gpg-agent and dirmngr for the temporary imports

@@ -1,6 +1,6 @@
 ---
 
-ocrserver_user: tt
+ocrserver_user: "{{ lookup('env', 'USER') }}"
 
 tika_version: '1.19.1'
 

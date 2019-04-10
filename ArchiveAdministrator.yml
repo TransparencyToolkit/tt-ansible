@@ -1,0 +1,8 @@
+---
+# usage: ansible-playbook -v --ask-become-pass -c local ArchiveAdministrator.yml
+
+- name: ArchiveAdministrator installation
+  hosts: localhost
+  gather_facts: no
+  roles:
+    - archive_administrator

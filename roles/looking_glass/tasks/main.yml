@@ -40,15 +40,6 @@
     repo: https://github.com/TransparencyToolkit/Test-Data.git
     umask: "0077"
 
-- name: Ensure postgresql service has started
-  become: true
-  service: name=postgresql state=started enabled=yes
-
-  #      - name: Wait for git repositories to sync
-  #        retries: 60
-  #        delay: 60
-  #        until: docmanager.finished and lookingglass.finished and testdata.finished
-
 - name: LG - bundle install
   become: yes
   command: chdir=LookingGlass bash -lc 'bundle install'

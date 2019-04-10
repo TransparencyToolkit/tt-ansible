@@ -1,10 +1,15 @@
 ---
 # install and configure the OCRServer component of Transparency Toolkit
 
+- name: Check if we need to install OCRServer
+  stat: path=/lib/systemd/system/ocrserver.service
+  register: get_ocrserver
+
 - name: Fetch OCRServer source code
   register: ocrserver
   async: 3600
   poll: 10
+  retries: 5
   git:
     depth: 1
     dest: OCRServer
@@ -13,6 +18,7 @@
 
 - name: install dependencies
   become: true
+  retries: 10
   apt:
     state: latest
     install_recommends: no
@@ -21,66 +27,82 @@
     name:
       - graphicsmagick
       - poppler-data
+      - poppler-utils
       - ghostscript
       - tesseract-ocr
       - pdftk
-      - openjdk-8-jre
+      - openjdk-8-jre-headless
       - libreoffice
-      #- openjdk-8-jdk
       #- libcurl3
       #- libcurl3-gnutls
       - libcurl4-openssl-dev
+      - libmagic-dev
 
 - name: Check if we need to fetch Tika
-  stat: path=tika-server-{{ tika_version }}.jar.asc
+  stat: path=/lib/systemd/system/tika.service
   register: tika
 
 - name: Create temporary directory for Tika GPG key
+  when: not tika.stat.exists
   tempfile: state=directory suffix=.tika.gpg
   register: tika_gpg_dir # tika_gpg_dir.path
 
-- name: fetch tika-server keys
-  command: # from 'bob' from https://people.apache.org/keys/group/tika.asc
-    gpg --homedir '{{ tika_gpg_dir.path }}'
-        --recv-key '833C1CC4926C1DDE29BB8731E4032DC4EF0CF38A'
-
-- name: fetch tika-server signature
+- name: fetch tika-server jar file
+  when: not tika.stat.exists
+  retries: 10
   command:
-    curl 'https://archive.apache.org/dist/tika/tika-server-{{ tika_version }}.jar.asc'
-         -o tika-server-{{ tika_version }}.jar.asc
+    curl "https://archive.apache.org/dist/tika/tika-server-{{ tika_version }}.jar"
+    -o "tika-server-{{ tika_version }}.jar.unverified"
 
 - name: fetch tika-server jar file
   when: not tika.stat.exists
-  command:
-    curl 'https://archive.apache.org/dist/tika/tika-server-{{ tika_version }}.jar'
-         -o tika-server-{{ tika_version }}.jar
+  retries: 10
+  get_url:
+    url: "https://archive.apache.org/dist/tika/tika-server-{{ tika_version }}.jar.asc"
+    dest: "{{cwd}}/tika-server-{{ tika_version }}.jar.asc"
+    validate_certs: yes
+
+
+- name: Install Tika GPG signing key
+  when: not tika.stat.exists
+  become: true
+  template:
+    src: tika.key.asc
+    dest: '{{ cwd }}/tika.key.asc'
+    mode: 0444 #ugo=r
+
+- name: fetch tika-server keys
+  when: not tika.stat.exists
+  command: # from 'Tim' from https://people.apache.org/keys/group/tika.asc
+    gpg --homedir '{{ tika_gpg_dir.path }}'
+        --import '{{ cwd }}/tika.key.asc'
 
 - name: verify tika-server signature
+  when: not tika.stat.exists
   command:
     gpg --homedir '{{ tika_gpg_dir.path }}'
-        --verify 'tika-server-{{ tika_version }}.jar.asc'
-        'tika-server-{{ tika_version }}.jar'
+        --verify '{{cwd}}/tika-server-{{ tika_version }}.jar.asc'
+        '{{cwd}}/tika-server-{{ tika_version }}.jar.unverified'
 
-- name: Include IndexServer dependency
-  include_role: name=index_server
+- name: put tika-server jar file in place
+  when: not tika.stat.exists
+  copy:
+    remote_src: yes
+    src: '{{cwd}}/tika-server-{{ tika_version }}.jar.unverified'
+    dest: '{{cwd}}/tika-server-{{ tika_version }}.jar'
 
 - name: install ruby gem dependencies
+  when: not tika.stat.exists
   become: true
-  command: bash -lc 'gem install doc_integrity_check mimemagic docsplit curb'
+  command: bash -lc 'gem install doc_integrity_check mimemagic docsplit curb ruby-filemagic pry mail listen rubyzip'
 
 - name: Install Tika service
+  when: not tika.stat.exists
   become: true
   template:
     src: tika.service.j2
     dest: /lib/systemd/system/tika.service
     mode: 0444 #ugo=r
-
-- name: Restart Tika systemd service
-  become: true
-  systemd:
-    state: restarted
-    daemon_reload: yes
-    name: tika
 
 - name: Wait for git repos to sync
   async_status:
@@ -90,6 +112,7 @@
   until: ocrserver.finished
 
 - name: Install OCRServer service
+  when: not get_ocrserver.stat.exists
   become: true
   template:
     src: ocrserver.service.j2
@@ -110,15 +133,20 @@
       [Service]
       Environment="{{item.name}}={{ item.value }}"
   with_items:
-    - {name: 'indexserver_url', value: '{{ indexserver_url }}' }
-    - {name: 'gpg_signer', value: '{{ gpg_signer }}'}
-    - {name: 'gpg_recipient', value: '{{ gpg_recipient }}'}
+    - {name: 'OCR_IN_PATH', value: '{{ocr_in_path}}' }
+    - {name: 'OCR_OUT_PATH', value: '{{ocr_out_path}}' }
+    - {name: 'PROJECT_INDEX', value: '{{project_index}}' }
 
-- name: Restart OCRServer systemd service
+- name: OCRServer - Turn off systemd services
   become: true
   systemd:
-    state: restarted
+    state: stopped
+    enabled: no
+    masked: yes
     daemon_reload: yes
-    name: ocrserver
+    name: "{{item}}"
+  with_items:
+  - ocrserver
+  - tika
 
 # TODO see OCRServer README for details on how to test

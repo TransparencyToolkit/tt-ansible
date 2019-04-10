@@ -1,0 +1,171 @@
+---
+# Setup things required for the hosted server scenario
+
+# TODO make sure there's a /root/.ssh/authorized_keys
+
+- name: install tooling
+  become: true
+  retries: 5
+  apt:
+    state: latest
+    update_cache: yes
+    cache_valid_time: 7200
+    install_recommends: no
+    name:
+      - ebtables
+      - firewalld
+      - busybox-static
+      - console-setup
+      - ltrace
+      - tmux
+      - man-db
+      - tcpdump
+      - netcat
+
+# TODO firewall:
+# allow connections from AA to DM port 300x?
+# allow connections from archivevm to public VM port 22
+# allow connections from host port 22
+# firewall-cmd --zone=public --add-rich-rule='rule family="ipv4" source address="192.168.0.254" port="3002" accept'
+
+
+- name: reload firewalld
+  become: true
+  shell: firewall-cmd --reload
+
+- name: force loading of needed kernel modules for this boot
+  become: true
+  shell: modprobe 9p 9pnet 9pnet_virtio overlay
+
+- name: force loading of needed kernel modules on boot
+  become: true
+  blockinfile:
+    dest: /etc/modules
+    content: |
+      9p
+      9pnet
+      9pnet_virtio
+      overlay
+
+- name: set GRUB_TIMEOUT to 0 to prevent delay at boot
+  become: true
+  register: grub_updated
+  lineinfile:
+    dest: /etc/default/grub
+    regexp: "^GRUB_TIMEOUT=[0-9]*$"
+    line: "GRUB_TIMEOUT=0"
+
+- name: update grub with the new GRUB_TIMEOUT
+  when: grub_updated.changed
+  become: true
+  shell: update-grub
+
+- name: Create empty root-owned directories
+  become: true
+  file:
+    path: "{{item}}"
+    state: directory
+  with_items:
+  - /tt-config
+  - /data
+  - /data/tt_archive_config
+  - /mnt/overlay-config-empty
+
+- name: Create empty user-owned directories
+  file:
+    path: "{{item}}"
+    state: directory
+  with_items:
+  - /home/tt/ocr_in
+  - /home/tt/ocr_out
+
+- name: configure /tt-config/ to /etc/systemd/system overlayfs automount
+  become: true
+  blockinfile:
+    dest: /etc/fstab
+    content: |
+      /tt-config/ /tt-config 9p nofail,ro,sync,dirsync,noatime,noauto,x-systemd.device-timeout=10,timeo=14,x-systemd.idle-timeout=0,cache=none,trans=virtio 0 0
+      overlay /etc/systemd/system overlay rw,nosuid,nodev,noatime,lowerdir=/tt-config,upperdir=/etc/systemd/system,workdir=/mnt/overlay-config-empty,x-systemd.requires-mounts-for=/tt-config,nofail
+
+- name: Include dependency
+  include_role: name=docmanager
+  # TODO consider public=yes here to let us have global variables
+  # TODO can also pass in variables to override defaults...
+  # TODO https://docs.ansible.com/ansible/latest/modules/include_role_module.html
+
+- name: Include dependency
+  include_role: name=catalyst
+
+- name: Include dependency
+  include_role: name=indexserver
+
+- name: Include dependency
+  include_role: name=docupload
+
+- name: Include dependency
+  include_role: name=ocrserver
+
+- name: Include dependency
+  include_role: name=lookingglass
+
+- name: Include dependency
+  include_role: name=archiveadministrator
+
+- name: Disable and mask TT systemd services
+  become: true
+  systemd:
+    daemon_reload: yes
+    name: "{{item}}"
+    enabled: no
+    state: stopped
+    masked: yes
+  with_items:
+  - archiveadministrator
+  - catalyst
+  - docmanager
+  - docmanager-reload.service
+  - docmanager-reload.path
+  - docupload
+  - elasticsearch
+  - redis-server
+  - indexserver
+  - ocrserver
+  - lookingglass
+  - tika
+  - postgresql
+  - stanford-ner
+  - rsync
+  - apt-daily.service
+  - apt-daily.timer
+  - apt-daily-upgrade.service
+  - apt-daily-upgrade.timer
+  - systemd-timesyncd
+
+- name: Install Transparency Toolkit mount guard service
+  become: true
+  template:
+    src: daemonctlreload.service
+    dest: /lib/systemd/system/daemonctlreload.service
+    mode: 0444 #ugo=r
+
+- name: Install Transparency Toolkit mount guard path watchdog
+  become: true
+  template:
+    src: daemonctlreload.path
+    dest: /lib/systemd/system/daemonctlreload.path
+    mode: 0444 #ugo=r
+
+- name: Enable and start mount guard watchdog service
+  become: true
+  systemd:
+    name: daemonctlreload.service
+    enabled: yes
+    state: stopped
+    daemon_reload: yes
+
+- name: Enable and start mount guard path watchdog
+  become: true
+  systemd:
+    name: daemonctlreload.path
+    enabled: yes
+    state: stopped

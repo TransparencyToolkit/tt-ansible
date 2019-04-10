@@ -1,0 +1,13 @@
+[Unit]
+Description=Transparency Toolkit Environment Reloader
+Before=archiveadministrator.service docmanager.service indexserver.service ocrserver.service docupload.service lookingglass.service catalyst.service stanford-ner.service tika.service
+RequiresMountsFor=/tt-config /etc/systemd/system
+
+[Service]
+Type=oneshot
+User=root
+ExecStart=/bin/systemctl daemon-reload
+ExecReload=/bin/systemctl daemon-reload
+
+[Install]
+WantedBy=multi-user.target

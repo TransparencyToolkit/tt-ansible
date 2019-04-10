@@ -1,0 +1,55 @@
+---
+# Setup things required for the hosted server scenario
+
+# TODO make sure there's a /root/.ssh/authorized_keys
+
+- name: install tooling
+  become: true
+  retries: 5
+  apt:
+    state: latest
+    update_cache: yes
+    cache_valid_time: 7200
+    install_recommends: no
+    name:
+      - ebtables
+      - dnsmasq
+      - firewalld
+      - qemu-kvm
+      - libvirt-daemon-system
+      - busybox-static
+      - console-setup
+      - virtinst
+      - libguestfs-tools
+      - ltrace
+      - tmux
+      - bridge-utils
+      - man-db
+      - tcpdump
+      - netcat
+      - python3-pyinotify
+
+- name: allow incoming port 443
+  become: true
+  shell: firewall-cmd --zone=public --add-port=443/tcp --permanent
+
+- name: allow incoming port 80
+  become: true
+  shell: firewall-cmd --zone=public --add-port=80/tcp --permanent
+
+- name: reload firewalld
+  become: true
+  shell: firewall-cmd --reload
+
+- name: force loading of 9p kernel modules for this boot
+  become: true
+  shell: modprobe 9p 9pnet 9pnet_virtio
+
+- name: force loading of 9p kernel modules on boot
+  become: true
+  blockinfile:
+    dest: /etc/modules
+    content: |
+      9p
+      9pnet
+      9pnet_virtio

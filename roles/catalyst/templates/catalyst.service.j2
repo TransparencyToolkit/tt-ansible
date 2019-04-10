@@ -2,6 +2,7 @@
 Description=Transparency Toolkit Catalyst
 Requires=network.target stanford-ner.service
 After=syslog.target network.target stanford-ner.service
+
 [Service]
 Type=simple
 
@@ -11,7 +12,7 @@ Type=simple
 User={{ catalyst_user }}
 WorkingDirectory={{ cwd }}/Catalyst/
 
-ExecStart=/bin/bash -lc 'rails server --environment=development --pid=/run/catalyst/catalyst.pid --binding=127.0.0.1 --port=9004'
+ExecStart=/bin/bash -lc 'rails server --environment=production --pid=/run/catalyst/catalyst.pid --binding=127.0.0.1 --port=9004'
 
 ExecStop=/bin/bash -lc 'rails -e "exit 0"'
 

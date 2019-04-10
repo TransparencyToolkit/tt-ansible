@@ -1,0 +1,21 @@
+---
+ansible_become_flags: '--login'
+
+project_index: archive_test
+
+# The public-facing URL for DocUpload:
+docupload_url: http://127.0.0.1:9292
+
+# The internal URL for Catalyst:
+catalyst_url: http://127.0.0.1:9004
+
+# The internal URL for DocManager:
+docmanager_url: http://127.0.0.1:3000
+
+lookingglass_ip:   '0.0.0.0'
+lookingglass_user: tt
+
+# the branch pulled from https://github.com/TransparencyToolkit/LookingGlass
+lookingglass_git_branch: master
+
+cwd: "{{ lookup('env', 'PWD') }}"

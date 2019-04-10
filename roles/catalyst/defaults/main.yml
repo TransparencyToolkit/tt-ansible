@@ -1,4 +1,5 @@
 ---
+ansible_become_flags: '--login'
 
 # Version of Stanford NER to use (this must be available
 #   as ${stanford_ner_version}.zip on their webpage):

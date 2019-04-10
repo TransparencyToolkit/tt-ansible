@@ -1,0 +1,26 @@
+[Unit]
+Description=Transparency Toolkit systemd override watch
+[Path]
+PathChanged=/etc/systemd/system
+PathChanged=/etc/systemd/system/archiveadministrator.service.d
+PathChanged=/etc/systemd/system/catalyst.service.d
+PathChanged=/etc/systemd/system/docmanager.service.d
+PathChanged=/etc/systemd/system/docupload.service.d
+PathChanged=/etc/systemd/system/indexserver.service.d
+PathChanged=/etc/systemd/system/lookingglass.service.d
+PathChanged=/etc/systemd/system/stanford-ner.service.d
+PathChanged=/etc/systemd/system/ocrserver.service.d
+PathModified=/etc/systemd/system
+PathModified=/etc/systemd/system/archiveadministrator.service.d
+PathModified=/etc/systemd/system/catalyst.service.d
+PathModified=/etc/systemd/system/docmanager.service.d
+PathModified=/etc/systemd/system/docupload.service.d
+PathModified=/etc/systemd/system/indexserver.service.d
+PathModified=/etc/systemd/system/lookingglass.service.d
+PathModified=/etc/systemd/system/stanford-ner.service.d
+PathModified=/etc/systemd/system/ocrserver.service.d
+
+
+Unit=daemonctlreload.service
+[Install]
+WantedBy=multi-user.target

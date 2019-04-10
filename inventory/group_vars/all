@@ -1,0 +1,4 @@
+---
+
+# make ansible use sudo --login to reinitialize /sbin etc in PATH when running as root
+ansible_become_flags: "--login"

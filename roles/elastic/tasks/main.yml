@@ -2,7 +2,7 @@
 # Install ElasticSearch
 
 - name: Check if we need to fetch ElasticSearch GPG key
-  stat: path=/etc/apt/sources.list.d/elastic-5-x.list
+  stat: path=/etc/init.d/elasticsearch
   register: elastic
 
 - name: Create temporary directory for ElasticSearch GPG key
@@ -22,22 +22,41 @@
 - name: Install ElasticSearch APT GPG key (yolo)
   become: true
   when: not elastic.stat.exists
+  retries: 10
+  delay: 3
+  register: elastic_gpg_fetch
+  until: elastic_gpg_fetch.rc == 0
   shell: 'gpg --homedir={{elastic_gpg_dir.path}} --export "4609 5ACC 8548 582C 1A26 99A9 D27D 666C D88E 42B4" | apt-key add >/dev/null'
 
-- name: Add ElasticSearch APT repository
-  become: true
+- name: Force-update package definitions to learn of the elasticsearch pkg
   when: not elastic.stat.exists
+  become: true
+  retries: 10
+  apt:
+    state: latest
+    install_recommends: no
+    cache_valid_time: 7200
+    update_cache: yes
+    name:
+      - apt-transport-https
+
+- name: Add ElasticSearch APT repository
+  when: not elastic.stat.exists
+  become: true
   shell: echo "deb https://artifacts.elastic.co/packages/5.x/apt stable main" > /etc/apt/sources.list.d/elastic-5.x.list
   args:
     creates: /etc/apt/sources.list.d/elastic-5-x.list
 
 - name: Force-update package definitions to learn of the elasticsearch pkg
+  when: not elastic.stat.exists
   become: true
-  retries: 3
+  retries: 10
   apt: install_recommends=no update_cache=yes cache_valid_time=0
 
 - name: Install ElasticSearch package
+  when: not elastic.stat.exists
   become: true
+  retries: 10
   apt:
     state: latest
     install_recommends: no
@@ -47,6 +66,11 @@
       - default-jre-headless # java for elasticsearch
       - elasticsearch
 
+# elastic needs to be running for some of the setup things (DM?)
 - name: Ensure ElasticSearch service has started
   become: true
-  service: name=elasticsearch state=started enabled=yes
+  service: name=elasticsearch state=started enabled=yes masked=no
+
+- name: Wait for elastic to start
+  wait_for:
+    port: 9200

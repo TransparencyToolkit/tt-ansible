@@ -1,0 +1,16 @@
+[Unit]
+Description=Transparency Toolkit DocManager reload watchdog
+[Path]
+PathChanged=/etc/systemd/docmanager.service.d
+PathChanged=/tt-ansible/DocManager/dataspec_files
+PathChanged=/tt-ansible/DocManager/dataspec_files
+PathChanged=/tt-ansible/DocManager/dataspec_files/projects
+PathChanged=/tt-ansible/DocManager/dataspec_files/data_sources
+PathModified=/etc/systemd/docmanager.service.d
+PathModified=/tt-ansible/DocManager/dataspec_files
+PathModified=/tt-ansible/DocManager/dataspec_files
+PathModified=/tt-ansible/DocManager/dataspec_files/projects
+PathModified=/tt-ansible/DocManager/dataspec_files/data_sources
+
+[Install]
+WantedBy=multi-user.target

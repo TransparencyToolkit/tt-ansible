@@ -1,0 +1,13 @@
+---
+ansible_become_flags: '--login'
+
+
+# The user under which to run the DocUpload service:
+# (defaults to installing user)
+indexserver_user: "{{ lookup('env', 'USER') }}"
+
+ocr_out_path: '/home/tt/ocr_out'
+
+docmanager_url: 'http://127.0.0.1:3000'
+
+cwd: "{{ lookup('env', 'PWD') }}"

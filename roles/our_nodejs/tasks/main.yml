@@ -1,0 +1,92 @@
+---
+# Install NodeJS and Yarn
+
+#### nodejs:
+
+- name: Check if we need to fetch nodejs GPG key
+  stat: path=/etc/apt/sources.list.d/nodejs.list
+  register: nodejs
+
+- name: NodeJS - Fetch NodeJS GPG key
+  when: not nodejs.stat.exists
+  register: nodejs_gpg_key
+  async: 3600
+  poll: 10
+  get_url:
+    checksum: sha256:773b328f7b1d6db58a8c6a7fc89e2ed58ac5e06c3ab148411cf8272be7b1c472
+    mode: 0400 # u=r,go=
+    timeout: 25
+    dest: "{{ cwd }}/nodesource.gpg.key"
+    url: "https://deb.nodesource.com/gpgkey/nodesource.gpg.key"
+    validate_certs: yes
+
+- name: Install nodejs APT GPG key (yolo)
+  become: true
+  when: not nodejs.stat.exists
+  shell: 'apt-key add {{ cwd }}/nodesource.gpg.key'
+
+- name: Add NodeJS APT repository
+  become: true
+  when: not nodejs.stat.exists
+  shell: echo "deb https://deb.nodesource.com/node_10.x stretch main" > /etc/apt/sources.list.d/nodejs.list
+  args:
+    creates: /etc/apt/sources.list.d/nodejs.list
+
+###### yarn:
+
+- name: Check if we need to fetch Yarn GPG key
+  stat: path=/etc/apt/sources.list.d/yarnpkg.list
+  register: yarn
+
+- name: Create temporary directory for Yarn GPG key
+  when: not yarn.stat.exists
+  become: true # root needs to own everything here
+  tempfile: state=directory suffix=.yarn.gpg
+  register: yarn_gpg_dir # yarn_gpg_dir.path
+  # todo umask: "0077" ?
+
+- name: Install Yarn GPG signing key
+  when: not tika.stat.exists
+  become: true
+  template:
+    src: 72ECF46A56B4AD39C907BBB71646B01B86E50310.asc
+    dest: '{{ cwd }}/72ECF46A56B4AD39C907BBB71646B01B86E50310.asc'
+    mode: 0444 #ugo=r
+
+- name: Install Yarn APT GPG key
+  become: true
+  when: not yarn.stat.exists
+  shell: 'apt-key add {{ cwd }}/72ECF46A56B4AD39C907BBB71646B01B86E50310.asc >/dev/null'
+
+- name: Force-update package definitions to learn of the yarn pkg
+  become: true
+  apt:
+    state: latest
+    install_recommends: no
+    cache_valid_time: 7200
+    update_cache: yes
+    name:
+      - apt-transport-https
+
+- name: Add Yarn APT repository
+  become: true
+  when: not yarn.stat.exists
+  shell: echo "deb https://dl.yarnpkg.com/debian/ stable main" > /etc/apt/sources.list.d/yarn.list
+  args:
+    creates: /etc/apt/sources.list.d/yarn.list
+
+- name: Force-update package definitions to learn of the yarn pkg
+  become: true
+  retries: 3
+  apt: install_recommends=no update_cache=yes cache_valid_time=0
+
+- name: Install Yarn and NodeJS packages
+  become: true
+  apt:
+    state: latest
+    install_recommends: no
+    cache_valid_time: 7200
+    update_cache: yes
+    name:
+      - nodejs
+      - yarn

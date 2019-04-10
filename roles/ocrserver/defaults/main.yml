@@ -2,12 +2,17 @@
 
 ocrserver_user: "{{ lookup('env', 'USER') }}"
 
-tika_version: '1.19.1'
+tika_version: '1.20'
 
 indexserver_url: http://127.0.0.1:9494
 
-gpg_signer: 12345678
+ocr_in_path: '/home/tt/ocr_in/'
+ocr_out_path: '/home/tt/ocr_out/'
+project_index: 'archive_test'
 
-gpg_recipient: 98765432
+# gpg_signer: 12345678
+
+# gpg_recipient: 98765432
 
 cwd: "{{ lookup('env', 'PWD') }}"
+ansible_become_flags: '--login'

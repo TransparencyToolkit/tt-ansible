@@ -1,0 +1,27 @@
+---
+ansible_become_flags: '--login'
+
+archiveadministrator_ip: '0.0.0.0'
+
+archive_config_path: '/data/tt_archive_config'
+
+archiveadmin_url: 'http://10.13.1.2:3002'
+prepub_domain: 'https://demo.transparency.tools/'
+
+postgres_db: 'ArchiveAdministrator_production'
+postgres_username: 'ArchiveAdministrator'
+postgres_password: 'changeme'
+
+postgres_url: 'postgres://{{postgres_username}}:{{postgres_password}}@127.0.0.1/'
+
+PROJECT_INDEX: 'archive_test'
+ARCHIVE_SECRET_KEY: 'changemekey'
+
+redis_url: 'redis://localhost:6379/1'
+
+# The user under which to run the ArchiveAdministrator service:
+# (defaults to installing user)
+archiveadministrator_user: "{{ lookup('env', 'USER') }}"
+
+
+cwd: "{{ lookup('env', 'PWD') }}"

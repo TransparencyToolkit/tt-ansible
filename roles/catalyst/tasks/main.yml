@@ -14,6 +14,7 @@
       - libsqlite3-dev
       - libidn11-dev
       - hunspell
+      - unzip
       # on debian libcurl4 now conflicts libcurl3:
       #- libcurl3
       #- libcurl3-gnutls
@@ -27,6 +28,7 @@
   register: catalyst
   async: 3600
   poll: 10
+  retries: 5
   git:
     depth: 1
     dest: Catalyst
@@ -35,10 +37,16 @@
     recursive: no
     track_submodules: no
 
+- name: Check if we need to install Stanford NER service
+  stat: path=/lib/systemd/system/stanford-ner.service
+  register: stanford_installed
+
 - name: Catalyst - Fetch Stanford NER zip-file
+  when: not stanford_installed.stat.exists
   register: stanford_ner
   async: 3600
   poll: 10
+  retries: 5
   get_url:
     checksum: sha256:e37b0094040c95e98799d849a7be2f4967de6b786f0b07360d179756bd4dce95
     mode: 0400 # u=r,go=
@@ -56,6 +64,7 @@
 # we keep the date in the folder name to ensure that an update to this
 # role will fetch the most recent version specified here.
 - name: Catalyst - unzip Stanford NER
+  when: not stanford_installed.stat.exists
   unarchive:
     copy: no
     creates: "{{ cwd }}/{{ stanford_ner_version }}/{{ stanford_ner_version }}/stanford-ner.jar"
@@ -64,6 +73,7 @@
     src: "{{ stanford_ner_version }}.zip"
 
 - name: Install Stanford NER service
+  when: not stanford_installed.stat.exists
   become: true
   template:
     src: stanford-ner.service.j2
@@ -78,12 +88,13 @@
   become: true
   systemd:
     state: restarted
+    masked: no
     daemon_reload: yes
     name: stanford-ner
 
 - name: Ensure Stanford-NER service has started
   become: true
-  service: name=stanford-ner state=started enabled=yes
+  service: name=stanford-ner state=started enabled=yes masked=no
 
   #      - name: Wait for git repositories to sync
   #        retries: 60
@@ -96,18 +107,23 @@
 
 - name: Catalyst - bundle install
   become: true
-  command: chdir=Catalyst bash -lc 'bundle install'
-
-- name: Catalyst - rake db:setup
-  command: chdir=Catalyst bash -lc 'rake db:create'
-
-# TODO are we sure we want to reset automatically?
-- name: Catalyst - rake db:reset
-  command: chdir=Catalyst bash -lc 'rake db:reset'
+  command: chdir={{cwd}}/Catalyst bash -lc 'bundle install'
 
 - name: Catalyst - generate SECRET_KEY_BASE
   shell: "xxd -ps -l 20 /dev/urandom"
   register: catalyst_secret_key_base_fh
+
+- name: Catalyst - check if we need to make a new database
+  stat: path="{{cwd}}/Catalyst/db/production.sqlite3"
+  register: production_db
+
+- name: Catalyst - rake db:create db:setup
+  when: not production_db.stat.exists
+  command: chdir={{cwd}}/Catalyst bash -lc 'RAILS_ENV=production SECRET_KEY_BASE="{{ catalyst_secret_key_base_fh.stdout }}" bundle exec rake db:create db:setup'
+
+- name: Catalyst - migrate
+  when: production_db.stat.exists
+  command: chdir={{cwd}}/Catalyst bash -lc 'RAILS_ENV=production SECRET_KEY_BASE="{{ catalyst_secret_key_base_fh.stdout }}" bundle exec rake db:migrate'
 
 - name: Install Catalyst service
   become: true
@@ -132,14 +148,20 @@
   with_items:
     - {name: 'SECRET_KEY_BASE', value: '{{ catalyst_secret_key_base_fh.stdout }}' }
     - {name: 'DOCMANAGER_URL', value: '{{ docmanager_url }}' }
+    - {name: 'RAILS_ENV', value: 'production' }
 
 - name: Restart Catalyst systemd service
   become: true
   systemd:
     state: restarted
+    masked: no
     daemon_reload: yes
     name: catalyst
 
-- name: Ensure Catalyst service has started
+- name: Ensure Catalyst service is stopped and disabled
   become: true
-  service: name=catalyst state=started enabled=yes
+  service: name=catalyst state=stopped enabled=no masked=yes
+
+- name: Ensure Stanford-NER service is stopped and disabled
+  become: true
+  service: name=stanford-ner state=stopped enabled=no masked=yes

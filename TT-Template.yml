@@ -1,0 +1,8 @@
+---
+# usage: ansible-playbook -v --ask-become-pass -c local TT-Template.yml
+
+- name: TT template installation
+  hosts: localhost
+  gather_facts: no
+  roles:
+    - tt_template

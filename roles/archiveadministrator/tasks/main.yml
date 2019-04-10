@@ -1,0 +1,177 @@
+---
+
+- name: Fetch ArchiveAdministrator source code
+  register: archiveadministrator
+  async: 3600
+  poll: 5
+  retries: 10
+  git:
+    depth: 1
+    dest: ArchiveAdministrator
+    repo: https://github.com/TransparencyToolkit/ArchiveAdministrator
+    umask: "0077" # go= // must be quoted for some reason.
+    recursive: no
+    track_submodules: no
+
+- name: Install our dependencies from apt
+  become: true
+  retries: 10
+  apt:
+    state: latest
+    install_recommends: no
+    cache_valid_time: 7200
+    update_cache: yes
+    name:
+      - sudo # required for 'become'
+      - curl # for: rbenv?
+      - redis-server
+      - libcurl4-openssl-dev # undeclared/missing dependency for curb gem
+      - postgresql
+      - postgresql-client
+      - libpq-dev
+      - postgresql-contrib
+      - python-psycopg2
+
+- name: Ensure PostgreSQL service has started
+  become: true
+  retries: 10
+  service: name=postgresql state=started enabled=yes masked=no
+
+- name: Install gem dependencies
+  become: true
+  retries: 5
+  command: bash -lc 'gem install doc_integrity_check'
+
+- name: Install gem dependencies (javascript interpreter required for uglifier)
+  become: true
+  retries: 5
+  command: bash -lc 'gem install duktape'
+  # TODO do we still need this?
+
+- name: ArchiveAdministrator - generate random postgres password
+  shell: "xxd -ps -l 16 /dev/urandom"
+  register: postgres_password_fh
+
+- name: ArchiveAdministrator - register postgres password fact
+  set_fact: postgres_password="{{ postgres_password_fh.stdout }}"
+
+- name: ArchiveAdministrator - start postgres again
+  become: true
+  shell: 'systemctl start postgresql'
+
+- name: ArchiveAdministrator - provision postgres db
+  become: yes
+  become_user: postgres
+  postgresql_db:
+    encoding: UTF-8
+    name: "ArchiveAdministrator_production"
+    template: "template1"
+
+- name: ArchiveAdministrator - provision postgres user
+  become: yes
+  become_user: postgres
+  postgresql_user:
+    db: "{{ postgres_db }}"
+    name: "{{ postgres_username }}"
+    password: "{{ postgres_password }}"
+    encrypted: yes # required for pg >= 10
+    priv: all
+    role_attr_flags: CREATEDB,SUPERUSER
+  with_items:
+    - { db: '{{postgres_db}}' }
+    # dev stuff
+
+- name: ArchiveAdministrator - learn location of postgres' hba.conf
+  become: true
+  become_user: postgres
+  shell: chdir=/ psql -P format=unaligned -tc 'show hba_file;'
+  register: postgres_hba_cmd
+
+- name: "ArchiveAdministrator - allow unix socket logins with passwords for postgres user '{{ postgres_username }}'"
+  become: true
+  lineinfile:
+    dest: "{{ postgres_hba_cmd.stdout }}"
+    insertbefore: "^local\\s+all\\s+all\\s+.*peer$"
+    #line: "local\t{{ postgres_db }}\t{{ postgres_username }}\t\tmd5" # TODO
+    line: "local\tall\t{{ postgres_username }}\t\tmd5"
+
+- name: Ensure PostgreSQL service is reloaded after config changes
+  become: true
+  service: name=postgresql state=reloaded enabled=yes
+
+- name: Ensure PostgreSQL service is reloaded after config changes
+  become: true
+  service: name=postgresql state=started enabled=yes masked=no
+
+- name: Wait for postgres to start
+  wait_for:
+    port: 5432
+
+- name: ArchiveAdministrator - bundle install
+  become: true
+  command: chdir={{cwd}}/ArchiveAdministrator bash -lc 'bundle install'
+
+- name: Install ArchiveAdministrator service
+  become: true
+  template:
+    src: archiveadministrator.service.j2
+    dest: /lib/systemd/system/archiveadministrator.service
+    mode: 0444 # ugo=r
+
+- name: generate SECRET_KEY_BASE
+  shell: "xxd -ps -l 20 /dev/urandom"
+  register: aa_secret_key_base_fh
+
+- name: Creates archiveadministrator.service.d directory
+  become: true
+  file: path=/etc/systemd/system/archiveadministrator.service.d/ state=directory
+
+- name: set environment variables in systemd conf
+  become: true
+  blockinfile:
+    create: yes
+    mode: 0440 #ug=r,o=
+    dest: /etc/systemd/system/archiveadministrator.service.d/{{ item.name }}.conf
+    content: |
+      [Service]
+      Environment="{{item.name}}={{ item.value }}"
+  with_items:
+    - {name: 'ARCHIVE_CONFIG_PATH', value: '{{archive_config_path}}' }
+    - {name: 'ARCHIVEADMIN_URL', value: '{{archiveadmin_url}}' }
+    - {name: 'ARCHIVEADMINISTRATOR_DATABASE_PASSWORD', value: '{{postgres_password}}' }
+    - {name: 'QUEUE', value: '*' }
+    - {name: 'RAILS_SERVE_STATIC_FILES', value: 'true'}
+    - {name: 'REDIS_URL', value: '{{redis_url}}' }
+    - {name: 'SECRET_KEY_BASE', value: '{{aa_secret_key_base_fh.stdout}}' }
+    - {name: 'PREPUB_ARCHIVE_DOMAIN', value: '{{prepub_domain}}' }
+    #- {name: 'DATABASE_URL', value: '{{postgres_url}}' }
+    # TODO
+
+- name: Wait for git repos to sync
+  async_status:
+    jid: "{{ archiveadministrator.ansible_job_id }}"
+  retries: 600
+  delay: 5
+  until: archiveadministrator.finished
+
+- name: ArchiveAdministrator - setup rake assets precompile
+  shell: chdir={{cwd}}/ArchiveAdministrator bash -lc 'rake assets:precompile'
+
+- name: ArchiveAdministrator - setup rake db stuff
+  shell: chdir={{cwd}}/ArchiveAdministrator bash -lc 'RAILS_ENV=production SECRET_KEY_BASE={{aa_secret_key_base_fh.stdout}} ARCHIVEADMINISTRATOR_DATABASE_PASSWORD={{postgres_password}} rake db:create'
+- name: ArchiveAdministrator - setup rake db stuff
+  shell: chdir={{cwd}}/ArchiveAdministrator bash -lc 'RAILS_ENV=production SECRET_KEY_BASE={{aa_secret_key_base_fh.stdout}} ARCHIVEADMINISTRATOR_DATABASE_PASSWORD={{postgres_password}} rake db:migrate'
+
+
+- name: Restart ArchiveAdministrator systemd service
+  become: true
+  systemd:
+    state: stopped
+    masked: yes
+    daemon_reload: yes
+    name: archiveadministrator
+
+#- name: Ensure ArchiveAdministrator service has started
+#  become: true
+#  retries: 10
+#  service: name=archiveadministrator state=restarted enabled=yes

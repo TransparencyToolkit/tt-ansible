@@ -66,7 +66,7 @@
 - name: Install rvm
   when: install_rvm
   become: true
-  command: bash rvm-installer
+  command: bash -lc '{{ cwd }}/rvm-installer'
 
 - name: install target ruby version
   become: true
@@ -87,6 +87,31 @@
 - name: ensure target ruby version is being used
   command: bash -lc "ruby -v | grep
     '^ruby {{ ruby_version.replace('.','\.') }}'"
+
+- name: find rvm gemrc path
+  shell: bash -lc "ruby -e 'puts File.dirname(Gem::ConfigFile::SYSTEM_WIDE_CONFIG_FILE)'"
+  register: gemrc_path
+
+- name: make sure is a etc/ directory for the rvm gemrc file
+  become: true
+  file:
+    mode: 0755 # = o+rwx,g+rx,o+rx
+    path: "{{gemrc_path.stdout}}"
+    state: directory
+
+- name: make sure is a gemrc file in the etc/ directory
+  become: true
+  file:
+    mode: 0544 # = o+rw,g+r,o+r
+    path: "{{gemrc_path.stdout}}/gemrc"
+    state: touch
+
+- name: try to make the gem tool not install documentation or upgrade gems
+  become: true
+  blockinfile:
+    dest: "{{gemrc_path.stdout}}/gemrc"
+    content: |
+      gem: --no-rdoc --no-ri --no-document --conservative
 
 - name: install bundler
   become: true

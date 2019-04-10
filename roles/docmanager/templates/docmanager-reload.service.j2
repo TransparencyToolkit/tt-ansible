@@ -1,0 +1,11 @@
+[Unit]
+Description=Transparency Toolkit DocManager reload watchdog
+After=daemonctlreload.service
+[Service]
+Type=oneshot
+User=root
+ExecStart=/bin/systemctl restart docmanager
+ExecReload=/bin/systemctl restart docmanager
+
+[Install]
+WantedBy=multi-user.target

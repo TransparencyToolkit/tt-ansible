@@ -27,7 +27,11 @@
       - man-db
       - tcpdump
       - netcat
+      - nginx
+      - openssh-server
+      - git
       - python3-pyinotify
+      - python3-certbot-nginx
 
 - name: allow incoming port 443
   become: true

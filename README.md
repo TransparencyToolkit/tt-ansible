@@ -44,17 +44,17 @@ We will be documenting the configuration options for each playbook below, but
 you can also manually consult the options for each role in
 the `roles/*/defaults/main.yml` files.
 
-**NB:** Since the pipeline is encrypted using [GPG](https://gnupg.org/), you must configure `gpg_recipient` and `gpg_signer` for most of the playbooks.
+## Hosted instance
 
-## Installing DocUpload
+See the [server-scripts README](#./server-scripts/README.md) for details on how to deploy a server that can automatically provision these services.
+
+## Installing DocUpload manually
 
 ```bash
 ansible-playbook -v --ask-become-pass --forks 10 -c local DocUpload.yml \
   --extra-vars "{
     'ocrserver_url': 'http://127.1.2.3:9393',
     'lookingglass_url': 'https://demo.transparency.tools/',
-    'gpg_recipient': 'TODO',
-    'gpg_signer': 'TODO',
   }"
 ```
 
@@ -73,7 +73,7 @@ docupload_tmpdir
 docupload_ip: '127.0.0.1'
 ```
 
-## Installing IndexServer
+## Installing IndexServer manually
 
 ```bash
 ansible-playbook -v --ask-become-pass --forks 10 -c local IndexServer.yml \
@@ -91,7 +91,7 @@ indexserver_user
 docmanager_url
 ```
 
-## Installing DocManager
+## Installing DocManager manually
 
 ```bash
 ansible-playbook -v --ask-become-pass --forks 10 -c local DocManager.yml \
@@ -115,10 +115,7 @@ catalyst_url
 ## Installing OCRServer
 
 ```bash
-ansible-playbook -v --ask-become-pass --forks 10 -c local OCRServer.yml \
-  --extra-vars "{
-    'gpg_recipient': '98765432',
-  }"
+ansible-playbook -v --ask-become-pass --forks 10 -c local OCRServer.yml
 ```
 
 Additional configuration options:
@@ -128,9 +125,6 @@ ocrserver_user
 tika_version: '1.19.1'
 
 indexserver_url: http://127.0.0.1:9494
-
-gpg_signer
-gpg_recipient
 ```
 
 

@@ -1,0 +1,8 @@
+---
+# usage: ansible-playbook -v --ask-become-pass -c local TT-Server.yml
+
+- name: TT host-side server installation
+  hosts: localhost
+  gather_facts: no
+  roles:
+    - tt_server

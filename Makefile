@@ -36,3 +36,6 @@ load-test-data:
 
 template:
 	ansible-playbook -v --forks 10 -c local TT-Template.yml
+
+server:
+	ansible-playbook -v --forks 10 -c local TT-Server.yml

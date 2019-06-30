@@ -1,7 +1,7 @@
 [Unit]
 Description=Transparency Toolkit DocManager
-Requires=network.target elasticsearch.service
-After=syslog.target network.target elasticsearch.service
+Requires=network.target elasticsearch.service postgresql.service
+After=syslog.target network.target elasticsearch.service postgresql.service
 
 [Service]
 Type=simple

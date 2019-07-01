@@ -131,6 +131,16 @@ An example of usage:
 ./generate-template june19 1
 ```
 
+Some things are configured here that you may want to change:
+```shell
+# template by default gets 50g storage space
+lvcreate -y --size 50g storage -n "${template}-template"
+
+# allocate 10% of the space (allocated to the template) to the AA template:
+lvcreate --snapshot --extents '10%ORIGIN' -n "admin-${template}" /dev/storage/${template}-template
+
+```
+
 ## generate-instance.sh
 
 Script called by [instance-control.py](#instance-control.py).
@@ -139,6 +149,13 @@ Creates COW snapshots of the specified template and configures them with
 the parameters received from AA.
 
 Two VMs are created: The "archive" VM and the "OCR" VM.
+
+The disk space allocated to them is defined here, which you probably want
+to change since the default of 15% of 50 GB is a little bit small:
+```shell
+lvcreate --snapshot --extents '15%ORIGIN' -n "${domain}" /dev/storage/${template}-template
+lvcreate --snapshot --extents '15%ORIGIN' -n "${domain_ocr}" /dev/storage/${template}-template
+```
 
 ## generate-public-instance.sh
 

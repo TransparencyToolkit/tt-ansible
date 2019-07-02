@@ -116,10 +116,14 @@
   retries: 1
   command: chdir={{cwd}}/DocManager bash -lc 'bundle install'
 
+- name: generate SECRET_KEY_BASE
+  shell: "xxd -ps -l 20 /dev/urandom"
+  register: docmanager_secret_key_base_fh
+
 - name: DocManager - setup rake db stuff
-  shell: chdir=DocManager bash -lc 'rake db:create'
+  shell: chdir=DocManager bash -lc 'RAILS_ENV=production SECRET_KEY_BASE={{docmanager_secret_key_base_fh.stdout}} rake db:create'
 - name: DocManager - setup rake db stuff
-  shell: chdir={{cwd}}/DocManager bash -lc 'rake db:migrate'
+  shell: chdir={{cwd}}/DocManager bash -lc 'RAILS_ENV=production SECRET_KEY_BASE={{docmanager_secret_key_base_fh.stdout}} rake db:migrate'
 
 - name: Install DocManager service
   become: true
@@ -145,11 +149,6 @@
 - name: Creates docmanager.service.d directory
   become: true
   file: path=/etc/systemd/system/docmanager.service.d/ state=directory
-
-
-- name: generate SECRET_KEY_BASE
-  shell: "xxd -ps -l 20 /dev/urandom"
-  register: docmanager_secret_key_base_fh
 
 - name: set environment variables in systemd conf
   become: true

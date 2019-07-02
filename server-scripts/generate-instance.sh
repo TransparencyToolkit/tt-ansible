@@ -49,7 +49,7 @@ mkdir -p "/tt_ocr/${domain}_out/ocred_docs"
 chown -R libvirt-qemu:libvirt-qemu "/tt_ocr/${domain}_"{in,out}
 chmod -R a+rwx "/tt_ocr/${domain}_"{in,out}
 
-lvcreate --snapshot --extents '15%ORIGIN' -n "${domain}" /dev/storage/${template}-template
+lvcreate --snapshot --extents '25%ORIGIN' -n "${domain}" /dev/storage/${template}-template
 lvcreate --snapshot --extents '15%ORIGIN' -n "${domain_ocr}" /dev/storage/${template}-template
 
 # TODO here we should also replace SECRET_KEY_BASE etc...

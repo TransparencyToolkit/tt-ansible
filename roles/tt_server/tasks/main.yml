@@ -57,3 +57,19 @@
       9p
       9pnet
       9pnet_virtio
+
+- name: create directories
+  become: true
+  file: path="{{ item }}" state=directory mode=0777
+  with_items:
+    - "/tt_archive_config"
+    - "/tt_archive_config/admin"
+    - "/tt_ocr"
+
+- name: create root ssh folder
+  become: true
+  file: path="/root/.ssh" state=directory mode=0700
+
+- name: create root authorized_keys
+  become: true
+  file: path="/root/.ssh/authorized_keys" state=directory mode=0600

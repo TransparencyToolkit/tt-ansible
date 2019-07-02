@@ -22,23 +22,21 @@ These scripts use the `10.0.0.0/8` IP range for internal addressing.
 
 4) `virsh net-autostart default`
 
-5) `mkdir /tt_archive_config /tt_ocr`
-
-6) ensure there's a LVM volume group ("vg") called `storage` with at
+5) ensure there's a LVM volume group ("vg") called `storage` with at
    least 100 GB disk space.
    If you don't have a partition to use with `pvcreate /path/to/partition`
    You can create a loopback-mounted file for this:
    `truncate -s 150g storage.file && pvcreate /dev/loop0`
    then `vgcreate storage /dev/loop0`
 
-7) Make sure there's a `/root/.ssh/authorized_keys` file containing the
+6) Make sure there's a `/root/.ssh/authorized_keys` file containing the
    public SSH keys you want to use to log into the instances while they
-   are running (or an empty file if you do not plan to do so)
+   are running.
 
-8) Make a new template using [generate-template.sh](#generate-template.sh)
+7) Make a new template using [generate-template.sh](#generate-template.sh)
 
-9) Start [instance-control.py](#instance-control.sh) after configuring the
-   domains and template to be used.
+8) Start [instance-control.py](#instance-control.sh) after configuring the
+   domains and template to be used. This script needs to be running at all times for AA to be functional.
 
 ## Debugging the services
 
@@ -92,9 +90,12 @@ This Python script handles:
 
 It is configured through the use of global variables in the top of the script.
 You will likely want to modify `TEMPLATE-NAME`, `INTERNAL_DOMAIN`,
-and `PUBLIC_DOMAIN` there.
+and `PUBLIC_DOMAIN` there:
+- `TEMPLATE_NAME`: name of the template to use when making new VMs, e.g. `test` or `june19`. It must have been generated with [generate-instance.sh](#generate-instance.sh) beforehand.
+- `INTERNAL_DOMAIN`: The hostname of AA, the main site where people create archives and modify them. While editing their archive, the users will be using URIs on this hostname. In most cases this will be your "top" domain.
+- `PUBLIC_DOMAIN`: The hostname under which archives are published for public consumption. The archives will receive a subdomain under this hostname.
 
-Usage (we recommend running this in a `tmux` session for now):
+Usage (we recommend running this in a `tmux` session for now, since it needs to run at all times for AA to be functional):
 ```shell
 ./instance-control.py
 ```

@@ -7,7 +7,7 @@ lint:
 		ArchiveAdministrator.yml DocManager.yml \
 		DocUpload.yml Catalyst.yml LookingGlass.yml \
 		load-test-data.yml OCRServer.yml IndexServer.yml \
-		TT-Template.yml
+		TT-Template.yml TT-Server.yml
 
 ArchiveAdministrator:
 	ansible-playbook -v --ask-become-pass --forks 10 -c local ArchiveAdministrator.yml

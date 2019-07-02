@@ -98,13 +98,13 @@ def nginx_config_subdomain(subdomain, gateway_ip, public_ip):
         client_max_body_size 10G;
         root /var/www/html;
         index index.html index.htm;
-        server_name {subdomain}.transparency.tools;
+        server_name {subdomain}.{PUBLIC_DOMAIN};
 
         location / {{
            proxy_connect_timeout 300; proxy_send_timeout 300;
            proxy_read_timeout 300;    send_timeout 300;
            proxy_redirect $scheme://$host:$server_port/ /;
-           proxy_set_header Host {subdomain}.transparency.tools;
+           proxy_set_header Host {subdomain}.{PUBLIC_DOMAIN};
            proxy_set_header X-Real-IP $remote_addr;
            proxy_buffer_size 8k; proxy_buffers 32 8k;
            proxy_buffering off;
